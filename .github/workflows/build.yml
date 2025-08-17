@@ -59,6 +59,7 @@ jobs:
         pip install pyinstaller
     
     - name: Create PyInstaller spec
+      shell: bash
       run: |
         python - <<'PYCODE'
         import os
@@ -125,6 +126,7 @@ jobs:
         with open('einstein.spec', 'w') as f:
             f.write(spec_content)
         PYCODE
+
     
     - name: Build executable
       run: |
