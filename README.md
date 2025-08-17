@@ -13,6 +13,9 @@ A smart, feature-rich contact management system with Google Contacts synchroniza
 🧠 Smart Contact Management System 📞
 ```
 
+<video src="intro-video.mp4" autoplay loop muted playsinline style="max-width:100%;"></video>
+
+
 ## ✨ Features
 
 - 📞 **Complete Contact Management**: Add, edit, delete, and search contacts
