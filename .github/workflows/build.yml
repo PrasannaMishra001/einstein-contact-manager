@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       matrix:
         include:
@@ -28,9 +29,18 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.9.13'
+    
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
         
     - name: Create embedded credentials from secrets
+      shell: bash
       run: |
         mkdir -p contacts
         cat > contacts/embedded_credentials.py << 'EOF'
@@ -134,7 +144,6 @@ jobs:
       with:
         name: ${{ matrix.artifact-name }}-${{ matrix.os }}
         path: dist/${{ matrix.artifact-name }}
-        # include-hidden-files: true  # uncomment if hidden files are needed
     
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -143,4 +152,3 @@ jobs:
         files: dist/${{ matrix.artifact-name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
