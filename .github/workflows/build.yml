@@ -130,10 +130,11 @@ jobs:
         fi
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.artifact-name }}
+        name: ${{ matrix.artifact-name }}-${{ matrix.os }}
         path: dist/${{ matrix.artifact-name }}
+        # include-hidden-files: true  # uncomment if hidden files are needed
     
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
