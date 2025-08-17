@@ -481,24 +481,34 @@ class CLIInterface:
         """Google Contacts synchronization menu"""
         console.print(Panel("☁️ Google Contacts Sync", style="blue"))
         
-        # Check if credentials file exists
-        credentials_path = os.path.join('data', 'credentials.json')
-        if not os.path.exists(credentials_path):
-            console.print("[red]❌ Google credentials not found![/red]")
-            console.print("\n[yellow]Setup required:[/yellow]")
-            console.print("1. Go to https://console.cloud.google.com/")
-            console.print("2. Create a new project or select existing")
-            console.print("3. Enable 'People API'")
-            console.print("4. Create OAuth 2.0 Client ID (Desktop Application)")
-            console.print("5. Download credentials.json")
-            console.print(f"6. Place credentials.json in: {credentials_path}")
-            console.print("\n[dim]Press Enter to continue...[/dim]")
-            input()
-            return
+        # Check if embedded credentials are available
+        try:
+            from contacts.embedded_credentials import EMBEDDED_CREDENTIALS, AUTHORIZED_USERS
+            has_embedded = True
+        except ImportError:
+            has_embedded = False
+        
+        if has_embedded:
+            console.print("[green]✓ Using built-in Google integration[/green]")
+        else:
+            # Check if credentials file exists
+            credentials_path = os.path.join('data', 'credentials.json')
+            if not os.path.exists(credentials_path):
+                console.print("[red]❌ Google credentials not found![/red]")
+                console.print("\n[yellow]Setup required:[/yellow]")
+                console.print("1. Go to https://console.cloud.google.com/")
+                console.print("2. Create a new project or select existing")
+                console.print("3. Enable 'People API'")
+                console.print("4. Create OAuth 2.0 Client ID (Desktop Application)")
+                console.print("5. Download credentials.json")
+                console.print(f"6. Place credentials.json in: {credentials_path}")
+                console.print("\n[dim]Press Enter to continue...[/dim]")
+                input()
+                return
         
         # Check authentication status
         is_authenticated = self.ab.is_google_authenticated()
-        auth_status = "[green]✓ Authenticated[/green]" if is_authenticated else "[red]❌ Not authenticated[/red]"
+        auth_status = "[green]✓ Authenticated[/green]" if is_authenticated else "[yellow]⚠️ Authentication required[/yellow]"
         console.print(f"Status: {auth_status}")
         
         options = [
@@ -518,6 +528,7 @@ class CLIInterface:
         
         if choice == "1":
             console.print("\n[yellow]Starting import from Google...[/yellow]")
+            console.print("[dim]This will open your browser for authentication if needed[/dim]")
             with console.status("[bold green]Fetching contacts from Google..."):
                 success, message = self.ab.sync_with_google('import')
             
@@ -576,6 +587,7 @@ class CLIInterface:
             stats_table.add_row("Google Synced", str(len(google_synced)))
             stats_table.add_row("Local Only", str(len(local_only)))
             stats_table.add_row("Authentication", "Yes" if is_authenticated else "No")
+            stats_table.add_row("Integration Type", "Built-in" if has_embedded else "Custom")
             
             console.print(stats_table)
             
@@ -588,6 +600,7 @@ class CLIInterface:
                 
         elif choice == "6":
             console.print("\n[yellow]Testing Google authentication...[/yellow]")
+            console.print("[dim]This may open your browser for authentication[/dim]")
             try:
                 with console.status("[bold green]Testing connection..."):
                     success = self.ab.google_sync.authenticate()
@@ -601,3 +614,4 @@ class CLIInterface:
                 
             except Exception as e:
                 console.print(f"[red]❌ Authentication failed: {e}[/red]")
+                console.print("[dim]Make sure you're added as a test user[/dim]")

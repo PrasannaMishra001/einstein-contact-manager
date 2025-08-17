@@ -78,6 +78,7 @@ data/sync_key.key
 data/contacts.json
 data/backups/
 data/photos/
+contacts/embedded_credentials.py
 
 # Logs
 *.log
@@ -90,6 +91,8 @@ temp/
 tmp/
 
 # Build artifacts
+*.spec
+einstein.exe
 build/
 dist/
 *.exe

@@ -1,6 +1,9 @@
 import os
 import pickle
 import json
+
+import tempfile
+
 from datetime import datetime
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -8,6 +11,15 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from contacts.contact import Contact
 from cryptography.fernet import Fernet
+
+# Import embedded credentials
+try:
+    from contacts.embedded_credentials import EMBEDDED_CREDENTIALS, AUTHORIZED_USERS
+    HAS_EMBEDDED_CREDS = True
+except ImportError:
+    HAS_EMBEDDED_CREDS = False
+    EMBEDDED_CREDENTIALS = None
+    AUTHORIZED_USERS = []
 
 class GoogleContactsSync:
     SCOPES = ['https://www.googleapis.com/auth/contacts']  # Read/write access
@@ -18,15 +30,16 @@ class GoogleContactsSync:
     def __init__(self):
         self.service = None
         self.encryption_key = self._get_or_create_key()
+        self.use_embedded_creds = HAS_EMBEDDED_CREDS and EMBEDDED_CREDENTIALS
     
     def _get_or_create_key(self):
         """Get or create encryption key for token security"""
+        os.makedirs('data', exist_ok=True)
         if os.path.exists(self.KEY_FILE):
             with open(self.KEY_FILE, 'rb') as key_file:
                 key = key_file.read()
         else:
             key = Fernet.generate_key()
-            os.makedirs(os.path.dirname(self.KEY_FILE), exist_ok=True)
             with open(self.KEY_FILE, 'wb') as key_file:
                 key_file.write(key)
         return Fernet(key)
@@ -38,6 +51,17 @@ class GoogleContactsSync:
     def _decrypt_token(self, encrypted_data):
         """Decrypt token data"""
         return pickle.loads(self.encryption_key.decrypt(encrypted_data))
+    
+    def _create_temp_credentials_file(self):
+        """Create temporary credentials file from embedded data"""
+        if not self.use_embedded_creds:
+            return None
+
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(EMBEDDED_CREDENTIALS, temp_file, indent=2)
+        temp_file.close()
+        return temp_file.name
     
     def authenticate(self):
         """Authenticate with Google and return service object"""
@@ -62,15 +86,40 @@ class GoogleContactsSync:
                     creds = None
             
             if not creds:
-                if not os.path.exists(self.CREDENTIALS_FILE):
+                # Try embedded credentials first
+                credentials_file = None
+                if self.use_embedded_creds:
+                    credentials_file = self._create_temp_credentials_file()
+                elif os.path.exists(self.CREDENTIALS_FILE):
+                    credentials_file = self.CREDENTIALS_FILE
+                
+                if not credentials_file:
                     raise FileNotFoundError(
-                        f"Google credentials file not found at {self.CREDENTIALS_FILE}\n"
-                        "Please download credentials.json from Google Cloud Console"
+                        "No Google credentials available. Contact the developer for access."
                     )
                 
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.CREDENTIALS_FILE, self.SCOPES)
-                creds = flow.run_local_server(port=0)
+                try:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        credentials_file, self.SCOPES)
+                    
+                    # Use a specific port for consistency
+                    creds = flow.run_local_server(
+                        port=8080,
+                        prompt='select_account',
+                        authorization_prompt_message='Please visit this URL to authorize Einstein Contact Manager: {url}',
+                        success_message='Authorization successful! You can close this window and return to Einstein.'
+                    )
+                    
+                    # Clean up temp file if used
+                    if credentials_file != self.CREDENTIALS_FILE:
+                        try:
+                            os.unlink(credentials_file)
+                        except:
+                            pass
+                            
+                except Exception as e:
+                    print(f"Authentication failed: {e}")
+                    return False
             
             # Save encrypted credentials
             os.makedirs(os.path.dirname(self.TOKEN_FILE), exist_ok=True)
@@ -78,8 +127,12 @@ class GoogleContactsSync:
                 encrypted_data = self._encrypt_token(creds)
                 token.write(encrypted_data)
         
-        self.service = build('people', 'v1', credentials=creds)
-        return True
+        try:
+            self.service = build('people', 'v1', credentials=creds)
+            return True
+        except Exception as e:
+            print(f"Failed to build Google service: {e}")
+            return False
     
     def fetch_contacts(self):
         """Fetch all contacts from Google"""
