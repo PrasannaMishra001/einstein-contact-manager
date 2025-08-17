@@ -1,0 +1,11 @@
+name,phone,email,tags,is_favorite,notes,created_date
+Michael Johnson,555-1001,michael@tech.com,work;colleague;tech,true,Senior developer at StartupXYZ,2024-01-15T10:30:00
+Sarah Williams,555-1002,sarah@design.com,work;creative,false,UI/UX designer for mobile apps,2024-01-15T10:30:00
+Robert Davis,555-1003,rob@email.com,friend;sports,true,Basketball teammate,2024-01-15T10:30:00
+Lisa Anderson,555-1004,,family,true,Aunt from Portland,2024-01-15T10:30:00
+Tom Wilson,555-1005,tom@business.com,work;client;important,false,CEO of Wilson Industries - major client,2024-01-15T10:30:00
+Jennifer Lopez,555-1006,jen@fitness.com,friend;fitness;trainer,true,Personal trainer and nutritionist,2024-01-15T10:30:00
+Mark Thompson,555-1007,mark@consulting.com,work;consultant,false,Business strategy consultant,2024-01-15T10:30:00
+Amanda Rodriguez,555-1008,amanda@med.org,family;doctor;emergency,true,Family doctor - emergency contact,2024-01-15T10:30:00
+Chris Martin,555-1009,chris@music.com,friend;music;band,false,Guitarist in local band,2024-01-15T10:30:00
+Diana Prince,555-1010,diana@law.com,work;legal;lawyer,true,Patent attorney for IP matters,2024-01-15T10:30:00

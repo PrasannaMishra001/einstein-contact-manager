@@ -1,0 +1,14 @@
+# Core functionality
+rich>=13.0.0          # For beautiful CLI interface
+python-dateutil>=2.8.0  # For date parsing
+
+# Google Integration
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=0.5.0
+cryptography>=3.4.8   # For token encryption
+
+# Optional enhancements
+Pillow>=9.0.0         # For image processing (photos)
+click>=8.0.0          # Alternative CLI framework
+tabulate>=0.9.0       # Alternative table formatting

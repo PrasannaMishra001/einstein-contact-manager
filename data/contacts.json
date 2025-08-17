@@ -1,0 +1,359 @@
+[
+  {
+    "name": "Alice Johnson",
+    "phone": "555-0101",
+    "email": "alice@email.com",
+    "tags": [
+      "work",
+      "colleague"
+    ],
+    "is_favorite": true,
+    "photo_path": null,
+    "notes": "Team lead at TechCorp",
+    "created_date": "2025-08-16T23:46:49.951249",
+    "modified_date": "2025-08-16T23:46:49.951296"
+  },
+  {
+    "name": "Bob Smith",
+    "phone": "555-0102",
+    "email": "bob@personal.com",
+    "tags": [
+      "friend"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "College roommate",
+    "created_date": "2025-08-16T23:46:49.951315",
+    "modified_date": "2025-08-16T23:46:49.951327"
+  },
+  {
+    "name": "Carol Davis",
+    "phone": "555-0103",
+    "email": "carol.davis@company.com",
+    "tags": [
+      "work",
+      "manager"
+    ],
+    "is_favorite": true,
+    "photo_path": null,
+    "notes": "Direct supervisor",
+    "created_date": "2025-08-16T23:46:49.951338",
+    "modified_date": "2025-08-16T23:46:49.951343"
+  },
+  {
+    "name": "David Wilson",
+    "phone": "555-0104",
+    "email": null,
+    "tags": [
+      "family"
+    ],
+    "is_favorite": true,
+    "photo_path": null,
+    "notes": "Cousin from Seattle",
+    "created_date": "2025-08-16T23:46:49.951352",
+    "modified_date": "2025-08-16T23:46:49.951357"
+  },
+  {
+    "name": "Emma Brown",
+    "phone": "555-0105",
+    "email": "emma@startup.com",
+    "tags": [
+      "work",
+      "client"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Potential business partner",
+    "created_date": "2025-08-16T23:46:49.951364",
+    "modified_date": "2025-08-16T23:46:49.951368"
+  },
+  {
+    "name": "Frank Miller",
+    "phone": "555-0106",
+    "email": "frank@email.com",
+    "tags": [
+      "friend",
+      "gym"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Workout buddy",
+    "created_date": "2025-08-16T23:46:49.951376",
+    "modified_date": "2025-08-16T23:46:49.951384"
+  },
+  {
+    "name": "Grace Lee",
+    "phone": "555-0107",
+    "email": "grace@med.com",
+    "tags": [
+      "family",
+      "doctor"
+    ],
+    "is_favorite": true,
+    "photo_path": null,
+    "notes": "Family physician",
+    "created_date": "2025-08-16T23:46:49.951396",
+    "modified_date": "2025-08-16T23:46:49.951401"
+  },
+  {
+    "name": "Henry Taylor",
+    "phone": "555-0108",
+    "email": "h.taylor@law.com",
+    "tags": [
+      "work",
+      "legal"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Company lawyer",
+    "created_date": "2025-08-16T23:46:49.951406",
+    "modified_date": "2025-08-16T23:46:49.951414"
+  },
+  {
+    "name": "Lav Mi",
+    "phone": "",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791608",
+    "modified_date": "2025-08-17T01:00:35.791634"
+  },
+  {
+    "name": "Deepesh",
+    "phone": "+91 6394 429 056",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791654",
+    "modified_date": "2025-08-17T01:00:35.791660"
+  },
+  {
+    "name": "Nisha Kv3",
+    "phone": "+91 94524 31771",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791675",
+    "modified_date": "2025-08-17T01:00:35.791680"
+  },
+  {
+    "name": "Baby 2",
+    "phone": "+91 6392 498 233",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791693",
+    "modified_date": "2025-08-17T01:00:35.791698"
+  },
+  {
+    "name": "Tanisha Whatsapp",
+    "phone": "8303054210",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791710",
+    "modified_date": "2025-08-17T01:00:35.791715"
+  },
+  {
+    "name": "Piyush",
+    "phone": "+91 89220 48054",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791726",
+    "modified_date": "2025-08-17T01:00:35.791738"
+  },
+  {
+    "name": "UDAY SINGH@",
+    "phone": "+91 96967 89784",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791749",
+    "modified_date": "2025-08-17T01:00:35.791755"
+  },
+  {
+    "name": "Neelu Mam",
+    "phone": "+917985256796",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791766",
+    "modified_date": "2025-08-17T01:00:35.791771"
+  },
+  {
+    "name": "Vinay",
+    "phone": "+91 73553 29513",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791782",
+    "modified_date": "2025-08-17T01:00:35.791788"
+  },
+  {
+    "name": "Divya",
+    "phone": "+917317682062",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791799",
+    "modified_date": "2025-08-17T01:00:35.791804"
+  },
+  {
+    "name": "Shivam Ka Bacha",
+    "phone": "+917778840206",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791816",
+    "modified_date": "2025-08-17T01:00:35.791821"
+  },
+  {
+    "name": "Prashant Kv",
+    "phone": "99356 51406",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791832",
+    "modified_date": "2025-08-17T01:00:35.791837"
+  },
+  {
+    "name": "Vineet",
+    "phone": "95064 84773",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791848",
+    "modified_date": "2025-08-17T01:00:35.791853"
+  },
+  {
+    "name": "Dev",
+    "phone": "+91 88581 03983",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791865",
+    "modified_date": "2025-08-17T01:00:35.791871"
+  },
+  {
+    "name": "Prasanna Mishra",
+    "phone": "+919506287890",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791882",
+    "modified_date": "2025-08-17T01:00:35.791887"
+  },
+  {
+    "name": "Brijesh Singh Imt",
+    "phone": "+917984920911",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791898",
+    "modified_date": "2025-08-17T01:00:35.791903"
+  },
+  {
+    "name": "Alok Imt",
+    "phone": "+918090175358",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791914",
+    "modified_date": "2025-08-17T01:00:35.791919"
+  },
+  {
+    "name": "Jyoti Mam English",
+    "phone": "96166 38221",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791931",
+    "modified_date": "2025-08-17T01:00:35.791936"
+  },
+  {
+    "name": "Shubham Sharma Imt",
+    "phone": "+918532802155",
+    "email": null,
+    "tags": [
+      "google-synced"
+    ],
+    "is_favorite": false,
+    "photo_path": null,
+    "notes": "Synced from Google",
+    "created_date": "2025-08-17T01:00:35.791947",
+    "modified_date": "2025-08-17T01:00:35.791953"
+  }
+]
