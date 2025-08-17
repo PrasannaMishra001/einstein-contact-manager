@@ -2,6 +2,8 @@
 
 A smart, feature-rich contact management system with Google Contacts synchronization, built for the terminal.
 
+<img src="pic.png" alt="Alt text" width="100%" />
+
 ```
 ███████╗██╗███╗   ██╗███████╗████████╗███████╗██╗███╗   ██╗
 ██╔════╝██║████╗  ██║██╔════╝╚══██╔══╝██╔════╝██║████╗  ██║
@@ -13,9 +15,7 @@ A smart, feature-rich contact management system with Google Contacts synchroniza
 🧠 Smart Contact Management System 📞
 ```
 
-<p align="center">
-  <img src="intro.gif" alt="Demo" width="600"/>
-</p>
+
 
 
 ## ✨ Features
