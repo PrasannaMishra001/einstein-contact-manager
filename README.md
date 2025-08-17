@@ -35,12 +35,12 @@ einstein
 ```
 
 ### Option 2: Direct Download
-1. Download the latest release from [GitHub Releases](https://github.com/yourusername/einstein-contact-manager/releases)
+1. Download the latest release from [GitHub Releases](https://github.com/PrasannaMishra001/einstein-contact-manager/releases)
 2. Run the installer for your platform
 
 ### Option 3: Build from Source
 ```bash
-git clone https://github.com/yourusername/einstein-contact-manager.git
+git clone https://github.com/PrasannaMishra001/einstein-contact-manager.git
 cd einstein-contact-manager
 python setup.py
 python main.py
@@ -128,7 +128,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🐛 Bug Reports
 
-Found a bug? Please open an issue on [GitHub Issues](https://github.com/yourusername/einstein-contact-manager/issues) with:
+Found a bug? Please open an issue on [GitHub Issues](https://github.com/PrasannaMishra001/einstein-contact-manager/issues) with:
 - Your operating system
 - Python version (if applicable)
 - Steps to reproduce the bug
@@ -137,8 +137,8 @@ Found a bug? Please open an issue on [GitHub Issues](https://github.com/youruser
 ## 📞 Support
 
 - 📖 [Documentation](docs/)
-- 🐛 [Bug Reports](https://github.com/yourusername/einstein-contact-manager/issues)
-- 💡 [Feature Requests](https://github.com/yourusername/einstein-contact-manager/issues)
+- 🐛 [Bug Reports](https://github.com/PrasannaMishra001/einstein-contact-manager/issues)
+- 💡 [Feature Requests](https://github.com/PrasannaMishra001/einstein-contact-manager/issues)
 
 ## 🎯 Roadmap
 
