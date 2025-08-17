@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write #linux
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -154,3 +157,4 @@ jobs:
         files: dist/${{ matrix.artifact-name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
