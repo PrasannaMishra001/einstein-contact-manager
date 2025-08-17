@@ -13,7 +13,9 @@ A smart, feature-rich contact management system with Google Contacts synchroniza
 🧠 Smart Contact Management System 📞
 ```
 
-<video src="intro-video.mp4" autoplay loop muted playsinline style="max-width:100%;"></video>
+<p align="center">
+  <img src="intro.gif" alt="Demo" width="600"/>
+</p>
 
 
 ## ✨ Features
