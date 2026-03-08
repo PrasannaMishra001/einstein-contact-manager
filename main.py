@@ -6,6 +6,14 @@ from contacts.cli_interface import CLIInterface, console
 from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
 from rich import box
+from rich.table import Table
+
+try:
+    from cli_api_client import EinsteinAPIClient
+    HAS_API_CLIENT = True
+except ImportError:
+    HAS_API_CLIENT = False
+
 
 def show_logo():
     """Display Einstein ASCII art logo"""
@@ -16,14 +24,105 @@ def show_logo():
     ██╔══╝  ██║██║╚██╗██║╚════██║   ██║   ██╔══╝  ██║██║╚██╗██║
     ███████╗██║██║ ╚████║███████║   ██║   ███████╗██║██║ ╚████║
     ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚══════╝╚═╝╚═╝  ╚═══╝
-    
+
          🧠 Smart Contact Management System 📞
          ═══════════════════════════════════════
     """
-    
     console.print(logo, style="bold cyan")
     console.print("[dim]Press Enter to continue...[/dim]")
     input()
+
+
+def api_mode_menu():
+    """Connect CLI to Einstein backend for cloud-synced mode."""
+    if not HAS_API_CLIENT:
+        console.print("[red]Install requests first: pip install requests[/red]")
+        return
+
+    client = EinsteinAPIClient()
+    console.print(Panel("🌐 API Mode — Connect to Einstein Backend", style="blue"))
+
+    if not client.is_connected():
+        api_url = Prompt.ask("Backend URL", default="http://localhost:8000")
+        client.base_url = api_url
+        if not client.is_connected():
+            console.print("[red]Cannot reach backend. Make sure it is running.[/red]")
+            return
+
+    if not client.token:
+        email = Prompt.ask("Email")
+        password = Prompt.ask("Password", password=True)
+        if client.login(email, password):
+            console.print("[green]✓ Logged in to cloud mode![/green]")
+        else:
+            console.print("[red]Login failed[/red]")
+            return
+
+    while True:
+        console.print(Panel("🌐 API / Cloud Mode", style="blue"))
+        console.print(
+            "  1. List contacts\n  2. Search contacts\n"
+            "  3. AI natural language search\n  4. Add contact\n"
+            "  5. Analytics\n  6. Logout\n  0. Back to local mode"
+        )
+        choice = Prompt.ask("Choose", choices=["0","1","2","3","4","5","6"])
+
+        if choice == "0":
+            break
+        elif choice == "1":
+            contacts = client.get_contacts(per_page=50)
+            t = Table(title=f"Cloud Contacts ({len(contacts)})", show_lines=False)
+            t.add_column("#", width=3, style="dim")
+            t.add_column("Name", style="cyan", min_width=20)
+            t.add_column("Phone", style="green")
+            t.add_column("Email", style="blue")
+            t.add_column("Tags", style="magenta")
+            for i, c in enumerate(contacts, 1):
+                tags = ", ".join(tg["name"] for tg in c.get("tags", []))
+                fav = "⭐ " if c.get("is_favorite") else ""
+                t.add_row(str(i), f"{fav}{c['name']}", c.get("phone") or "—", c.get("email") or "—", tags)
+            console.print(t)
+        elif choice == "2":
+            q = Prompt.ask("Search term")
+            contacts = client.get_contacts(search=q)
+            console.print(f"[green]Found {len(contacts)} contacts[/green]")
+            for c in contacts:
+                console.print(f"  • {c['name']} | {c.get('phone') or '—'} | {c.get('email') or '—'}")
+        elif choice == "3":
+            q = Prompt.ask("Ask anything (e.g. 'find my work contacts')")
+            with console.status("[bold green]Asking AI..."):
+                result = client.ai_search(q)
+            console.print(f"\n[bold cyan]AI Result:[/bold cyan] {result.get('explanation', '')}")
+            for c in result.get("contacts", []):
+                console.print(f"  • {c['name']} | {c.get('phone') or '—'}")
+        elif choice == "4":
+            name = Prompt.ask("Name")
+            phone = Prompt.ask("Phone (optional)") or None
+            email = Prompt.ask("Email (optional)") or None
+            company = Prompt.ask("Company (optional)") or None
+            notes = Prompt.ask("Notes (optional)") or None
+            created = client.create_contact({"name": name, "phone": phone, "email": email, "company": company, "notes": notes})
+            if created:
+                console.print(f"[green]✓ Contact '{name}' added to cloud![/green]")
+            else:
+                console.print("[red]Failed — check connection or login[/red]")
+        elif choice == "5":
+            stats = client.get_analytics()
+            if stats:
+                t = Table(title="📊 Cloud Analytics", box=box.ROUNDED)
+                t.add_column("Metric", style="cyan")
+                t.add_column("Value", style="green", justify="right")
+                for k, v in stats.items():
+                    if isinstance(v, (int, float)):
+                        t.add_row(k.replace("_", " ").title(), str(v))
+                console.print(t)
+        elif choice == "6":
+            client.logout()
+            console.print("[green]✓ Logged out from cloud mode[/green]")
+            break
+
+        console.print("\n[dim]Press Enter to continue...[/dim]")
+        input()
 
 def create_sample_data(ab):
     """Create sample contacts for demonstration"""

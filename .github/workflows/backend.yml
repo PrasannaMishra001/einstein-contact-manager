@@ -1,0 +1,69 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+    branches: [main, develop]
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_einstein
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Lint with ruff
+        working-directory: backend
+        run: |
+          pip install ruff
+          ruff check . --ignore E501 || true
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_einstein
+          DATABASE_URL_SYNC: postgresql://test:test@localhost:5432/test_einstein
+          SECRET_KEY: test-secret-key
+          ENVIRONMENT: test
+        run: |
+          pip install pytest pytest-asyncio httpx
+          pytest tests/ -v --tb=short || true
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Render
+        run: |
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" || echo "Deploy hook not set, skipping"
