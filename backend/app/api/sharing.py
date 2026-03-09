@@ -15,7 +15,10 @@ async def get_shared_contact(share_token: str, db: AsyncSession = Depends(get_db
     result = await db.execute(
         select(Contact)
         .where(Contact.share_token == share_token)
-        .options(selectinload(Contact.contact_tags).selectinload(ContactTag.tag))
+        .options(
+            selectinload(Contact.contact_tags).selectinload(ContactTag.tag),
+            selectinload(Contact.tags),
+        )
     )
     contact = result.scalar_one_or_none()
     if not contact:

@@ -20,7 +20,10 @@ router = APIRouter(prefix="/io", tags=["import-export"])
 async def _get_all_contacts(user_id: str, db: AsyncSession):
     result = await db.execute(
         select(Contact).where(Contact.user_id == user_id, Contact.is_archived == False)
-        .options(selectinload(Contact.contact_tags).selectinload(ContactTag.tag))
+        .options(
+            selectinload(Contact.contact_tags).selectinload(ContactTag.tag),
+            selectinload(Contact.tags),
+        )
         .order_by(Contact.name)
     )
     return result.scalars().all()

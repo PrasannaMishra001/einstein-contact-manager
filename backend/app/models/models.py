@@ -2,9 +2,8 @@ import uuid
 from datetime import datetime
 from sqlalchemy import (
     Column, String, Boolean, DateTime, Text, ForeignKey,
-    Index, func, Enum as SAEnum, ARRAY, JSON, Date
+    Index, func, JSON, Date
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
 

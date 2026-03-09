@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
-    # Gemini AI
+    # Groq AI (Llama 3.3 70B — free)
+    GROQ_API_KEY: str = ""
+
+    # Gemini AI (legacy — no longer used)
     GEMINI_API_KEY: str = ""
 
     # Cloudinary

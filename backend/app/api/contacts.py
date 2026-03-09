@@ -19,7 +19,8 @@ router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 def _contact_query(user_id: str):
     return select(Contact).where(Contact.user_id == user_id).options(
-        selectinload(Contact.contact_tags).selectinload(ContactTag.tag)
+        selectinload(Contact.contact_tags).selectinload(ContactTag.tag),
+        selectinload(Contact.tags),
     )
 
 
@@ -97,6 +98,7 @@ async def list_contacts(
             func.lower(Contact.phone).like(q),
             func.lower(Contact.email).like(q),
             func.lower(Contact.company).like(q),
+            func.lower(Contact.job_title).like(q),
             func.lower(Contact.notes).like(q),
         ))
 
