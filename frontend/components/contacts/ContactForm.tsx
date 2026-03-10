@@ -70,6 +70,8 @@ export function ContactForm({ contact, tags, onClose, onSuccess }: Props) {
         ...rest,
         email: data.email || undefined,
         phone: data.phone || undefined,
+        birthday: data.birthday || undefined,
+        anniversary: data.anniversary || undefined,
         social_links: hasSocial ? social_links : undefined,
       };
       let saved: Contact;
@@ -84,7 +86,10 @@ export function ContactForm({ contact, tags, onClose, onSuccess }: Props) {
       toast.success(contact ? "Contact updated!" : "Contact added!");
       onSuccess();
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Failed to save";
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+      const msg = Array.isArray(detail)
+        ? detail.map((e: { msg?: string }) => e.msg ?? "Validation error").join(", ")
+        : typeof detail === "string" ? detail : "Failed to save";
       toast.error(msg);
     } finally {
       setSaving(false);

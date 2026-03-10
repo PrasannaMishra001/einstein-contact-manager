@@ -1,9 +1,9 @@
 # Legacy terminal app artifacts (removed from repo)
-contacts/
-tests/
-bin/
-build/
-dist/
+/contacts/
+/tests/
+/bin/
+/build/
+/dist/
 intro.gif
 einstein-contact-manager-*.tgz
 einstein.spec
