@@ -9,8 +9,7 @@ from app.api import auth, contacts, ai, import_export, analytics, sharing, remin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if settings.ENVIRONMENT == "development":
-        await init_db()
+    await init_db()  # create_all is idempotent — safe in dev and production
     yield
 
 
