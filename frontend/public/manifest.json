@@ -2,8 +2,8 @@
   "name": "Einstein Contact Manager",
   "short_name": "Einstein",
   "description": "AI-powered contact management",
-  "theme_color": "#6366f1",
-  "background_color": "#0f172a",
+  "theme_color": "#EAB308",
+  "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/contacts",
   "icons": [
