@@ -1,3 +1,29 @@
+# Legacy terminal app artifacts (removed from repo)
+contacts/
+tests/
+bin/
+build/
+dist/
+intro.gif
+einstein-contact-manager-*.tgz
+einstein.spec
+install.bat
+install.js
+install.sh
+postinstall.js
+main.py
+setup.py
+setup_google_integration.py
+build_executable.py
+cli_api_client.py
+create_sample_csv.py
+note.txt
+SETUP.md
+# root-level requirements.txt is the old terminal app one
+requirements.txt
+# root-level package.json is the old npm package
+package.json
+
 # Python
 __pycache__/
 *.py[cod]
