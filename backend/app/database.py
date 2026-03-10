@@ -74,12 +74,18 @@ async def init_db():
     from sqlalchemy import text
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        # Incremental column migrations for SQLite (idempotent — silently skip if exists)
+        # Incremental column migrations — idempotent, safe to run every startup
         if _IS_SQLITE:
-            for stmt in [
-                "ALTER TABLE contacts ADD COLUMN social_links TEXT",
-            ]:
-                try:
-                    await conn.execute(text(stmt))
-                except Exception:
-                    pass
+            migrations = ["ALTER TABLE contacts ADD COLUMN social_links TEXT"]
+        else:
+            # PostgreSQL: ADD COLUMN IF NOT EXISTS (native idempotent)
+            migrations = [
+                "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS social_links JSON",
+                "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS google_resource_name VARCHAR(255)",
+                "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS share_token VARCHAR(64)",
+            ]
+        for stmt in migrations:
+            try:
+                await conn.execute(text(stmt))
+            except Exception:
+                pass
