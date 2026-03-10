@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 from datetime import datetime, date
 
 
@@ -75,6 +75,7 @@ class ContactCreate(BaseModel):
     notes: Optional[str] = None
     is_favorite: bool = False
     tag_ids: List[str] = Field(default_factory=list)
+    social_links: Optional[Dict[str, Optional[str]]] = None
 
 
 class ContactUpdate(BaseModel):
@@ -90,6 +91,7 @@ class ContactUpdate(BaseModel):
     is_favorite: Optional[bool] = None
     is_archived: Optional[bool] = None
     tag_ids: Optional[List[str]] = None
+    social_links: Optional[Dict[str, Optional[str]]] = None
 
 
 class ContactOut(BaseModel):
@@ -108,6 +110,7 @@ class ContactOut(BaseModel):
     is_archived: bool
     share_token: Optional[str]
     tags: List[TagOut] = []
+    social_links: Optional[dict] = None
     created_at: datetime
     updated_at: datetime
 
@@ -199,6 +202,20 @@ class BusinessCardRequest(BaseModel):
 
 class AutoTagRequest(BaseModel):
     contact_id: str
+
+
+class SmartDuplicateGroup(BaseModel):
+    ids: List[str]
+    names: List[str]
+    similarity_score: float
+    reason: str
+    contacts: List[ContactOut]
+
+
+class MergeRequest(BaseModel):
+    primary_id: str
+    secondary_id: str
+    field_preferences: dict = Field(default_factory=dict)
 
 
 # ── Analytics ─────────────────────────────────────────────────────────────────

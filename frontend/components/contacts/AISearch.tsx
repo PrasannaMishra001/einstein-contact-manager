@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
-import { aiAPI } from "@/lib/api";
-import { Brain, Loader2, X, Sparkles } from "lucide-react";
+import { aiAPI, contactsAPI } from "@/lib/api";
+import { Brain, Loader2, X, Sparkles, Mic, MicOff } from "lucide-react";
 import { ContactTable } from "./ContactTable";
-import { contactsAPI } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import type { Contact } from "@/types";
@@ -18,10 +17,31 @@ const EXAMPLES = [
 export function AISearch({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
   const [results, setResults] = useState<Contact[]>([]);
   const [explanation, setExplanation] = useState("");
   const [searched, setSearched] = useState(false);
   const qc = useQueryClient();
+
+  const startVoice = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { toast.error("Voice search not supported — try Chrome or Edge"); return; }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    setListening(true);
+    recognition.onresult = (event: { results: { [x: number]: { [x: number]: { transcript: string } } } }) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setListening(false);
+      search(transcript);
+    };
+    recognition.onerror = () => { setListening(false); toast.error("Voice recognition failed"); };
+    recognition.onend = () => setListening(false);
+    recognition.start();
+  };
 
   const search = async (q?: string) => {
     const finalQ = q ?? query;
@@ -41,39 +61,51 @@ export function AISearch({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-brand-500/5 to-purple-500/5 border border-brand-500/20 rounded-2xl p-5 space-y-4">
+    <div className="space-y-4 p-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5 text-brand-500" />
-          <span className="font-semibold text-sm">AI Natural Language Search</span>
+          <div className="w-7 h-7 bg-black flex items-center justify-center">
+            <Brain className="w-4 h-4 text-cyan-300" aria-hidden="true" />
+          </div>
+          <span className="font-black text-sm uppercase tracking-wide">AI Natural Language Search</span>
         </div>
-        <button onClick={onClose} className="p-1 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
-          <X className="w-4 h-4" />
+        <button type="button" onClick={onClose} aria-label="Close AI search" title="Close AI search"
+          className="w-7 h-7 border-2 border-black bg-white flex items-center justify-center hover:bg-red-400 hover:text-white transition-colors shadow-neo-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+          <X className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
       </div>
 
+      {/* Input row */}
       <div className="flex gap-2">
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === "Enter" && search()}
-          placeholder="Ask anything… 'find my work contacts in Mumbai'"
-          className="flex-1 bg-card border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          placeholder="Ask anything... 'find my work contacts in Mumbai'"
+          aria-label="AI search query"
+          className="neo-input flex-1"
         />
-        <button onClick={() => search()}
+        <button type="button" onClick={() => search()}
           disabled={loading || !query.trim()}
-          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          className="neo-btn bg-cyan-300 text-black px-4 py-2 text-xs">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" aria-hidden="true" />}
           Search
+        </button>
+        <button type="button" onClick={startVoice} disabled={listening}
+          title="Voice search"
+          aria-label={listening ? "Listening..." : "Start voice search"}
+          className={`neo-btn px-3 py-2 text-xs ${listening ? "bg-red-400 text-white" : "bg-white text-black"}`}>
+          {listening ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* Examples */}
+      {/* Example chips */}
       {!searched && (
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map(ex => (
-            <button key={ex} onClick={() => { setQuery(ex); search(ex); }}
-              className="text-xs bg-card border border-border px-3 py-1.5 rounded-full hover:border-brand-500/40 hover:bg-brand-500/5 transition-colors text-muted-foreground hover:text-foreground">
+            <button key={ex} type="button" onClick={() => { setQuery(ex); search(ex); }}
+              className="neo-badge bg-white text-black cursor-pointer hover:bg-yellow-50 transition-colors text-xs">
               {ex}
             </button>
           ))}
@@ -82,7 +114,8 @@ export function AISearch({ onClose }: { onClose: () => void }) {
 
       {/* Explanation */}
       {explanation && (
-        <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl px-4 py-3 text-sm text-brand-700 dark:text-brand-300">
+        <div className="border-2 border-black bg-cyan-50 px-4 py-3 text-sm font-medium">
+          <span className="font-black uppercase text-xs tracking-wide mr-2">AI:</span>
           {explanation}
         </div>
       )}

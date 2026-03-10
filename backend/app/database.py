@@ -71,5 +71,15 @@ async def get_db():
 
 async def init_db():
     """Create all tables (used in development; use Alembic in production)."""
+    from sqlalchemy import text
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Incremental column migrations for SQLite (idempotent — silently skip if exists)
+        if _IS_SQLITE:
+            for stmt in [
+                "ALTER TABLE contacts ADD COLUMN social_links TEXT",
+            ]:
+                try:
+                    await conn.execute(text(stmt))
+                except Exception:
+                    pass

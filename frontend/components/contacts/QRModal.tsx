@@ -23,35 +23,53 @@ export function QRModal({ contact, onClose }: { contact: Contact; onClose: () =>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">QR Code — {contact.name}</h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
-            <X className="w-4 h-4" />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      {/* Offset shadow */}
+      <div className="relative w-full max-w-sm">
+        <div className="absolute inset-0 translate-x-3 translate-y-3 border-4 border-black bg-cyan-300 pointer-events-none" />
+        <div className="relative border-4 border-black bg-white">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b-4 border-black bg-yellow-300">
+            <div>
+              <h3 className="font-black uppercase tracking-tight">QR Code</h3>
+              <p className="text-xs font-black text-black/60 uppercase tracking-wide">{contact.name}</p>
+            </div>
+            <button type="button" onClick={onClose} aria-label="Close QR code dialog" title="Close"
+              className="w-8 h-8 border-2 border-black bg-white flex items-center justify-center hover:bg-red-400 hover:text-white transition-colors shadow-neo-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* QR area */}
+          <div className="flex items-center justify-center p-6 bg-white">
+            {loading ? (
+              <div className="w-48 h-48 border-2 border-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin" aria-label="Loading QR code" />
+              </div>
+            ) : qr ? (
+              <div className="border-4 border-black p-2 bg-white shadow-neo">
+                <img src={qr} alt={`QR code for ${contact.name}`} className="w-44 h-44 block" />
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-black p-8 text-center">
+                <p className="text-sm font-black uppercase text-black/50">Failed to generate QR code</p>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t-2 border-black px-5 pb-5 pt-3 space-y-3">
+            <p className="text-center text-xs font-black uppercase tracking-wide text-black/60">
+              Scan to save {contact.name} as a contact (vCard)
+            </p>
+            {qr && (
+              <button type="button" onClick={download}
+                className="neo-btn-primary w-full py-2.5 text-sm">
+                <Download className="w-4 h-4" aria-hidden="true" />
+                Download PNG
+              </button>
+            )}
+          </div>
         </div>
-
-        <div className="flex items-center justify-center py-4">
-          {loading ? (
-            <Loader2 className="w-10 h-10 animate-spin text-brand-500" />
-          ) : qr ? (
-            <img src={qr} alt="QR Code" className="w-56 h-56 rounded-xl" />
-          ) : (
-            <p className="text-muted-foreground text-sm">Failed to generate QR code</p>
-          )}
-        </div>
-
-        <p className="text-center text-xs text-muted-foreground mb-4">
-          Scan to add {contact.name} to contacts (vCard)
-        </p>
-
-        {qr && (
-          <button onClick={download}
-            className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl text-sm font-medium transition-colors">
-            <Download className="w-4 h-4" /> Download PNG
-          </button>
-        )}
       </div>
     </div>
   );

@@ -51,6 +51,7 @@ class Contact(Base):
     is_favorite = Column(Boolean, default=False, nullable=False)
     is_archived = Column(Boolean, default=False, nullable=False)
     google_resource_name = Column(String(255))
+    social_links = Column(JSON)   # {"linkedin": "...", "twitter": "...", "website": "...", ...}
     share_token = Column(String(64), unique=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

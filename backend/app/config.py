@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # Groq AI (Llama 3.3 70B — free)
     GROQ_API_KEY: str = ""
 
-    # Gemini AI (legacy — no longer used)
+    # Gemini AI (used for business card photo OCR only)
     GEMINI_API_KEY: str = ""
 
     # Cloudinary

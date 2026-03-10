@@ -154,6 +154,7 @@ async def create_contact(
         anniversary=payload.anniversary,
         notes=payload.notes,
         is_favorite=payload.is_favorite,
+        social_links=payload.social_links,
     )
     db.add(contact)
     await db.flush()

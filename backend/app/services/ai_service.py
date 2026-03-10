@@ -1,14 +1,28 @@
-"""Groq-powered AI features (Llama 3.3 70B — free tier, 14,400 req/day)."""
+"""AI features: Groq (Llama 3.3 70B) for text tasks, Gemini 2.5 Flash for photo OCR."""
+import io
 import json
 import re
 from groq import Groq
 from app.config import settings
 
+# ── Groq client (text AI) ─────────────────────────────────────────────────────
 _client: Groq | None = None
 _MODEL = "llama-3.3-70b-versatile"
 
 if settings.GROQ_API_KEY:
     _client = Groq(api_key=settings.GROQ_API_KEY)
+
+# ── Gemini client (photo OCR) ─────────────────────────────────────────────────
+_gemini_model = None
+_GEMINI_MODEL = "gemini-2.5-flash"
+
+if settings.GEMINI_API_KEY:
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        _gemini_model = genai.GenerativeModel(_GEMINI_MODEL)
+    except Exception:
+        pass
 
 
 def _call(prompt: str, system: str = "You are a smart contact manager assistant. Always respond with valid JSON only.") -> str:
@@ -105,6 +119,7 @@ Return {{}} if nothing can be confidently suggested."""
 
 
 async def parse_business_card(text: str) -> dict:
+    """Parse business card from plain text using Groq."""
     prompt = f"""Extract contact information from this business card text:
 ---
 {text}
@@ -123,6 +138,27 @@ Return a JSON object with fields present:
 Only include fields clearly present in the text."""
     result = _extract_json(_call(prompt))
     return result if isinstance(result, dict) else {}
+
+
+async def parse_business_card_photo(image_bytes: bytes, mime_type: str = "image/jpeg") -> dict:
+    """Parse business card from an image using Gemini 2.5 Flash multimodal OCR."""
+    if not _gemini_model:
+        # Fallback: tell caller Gemini not configured
+        return {"error": "Gemini OCR not configured — set GEMINI_API_KEY in .env"}
+    try:
+        from PIL import Image
+        img = Image.open(io.BytesIO(image_bytes))
+        prompt = (
+            "Extract all contact information visible on this business card image. "
+            "Return ONLY valid JSON with these fields (include only fields that are clearly visible): "
+            '{"name": "...", "phone": "...", "email": "...", "company": "...", '
+            '"job_title": "...", "address": {"street": "...", "city": "...", "country": "..."}, "notes": "..."}'
+        )
+        response = _gemini_model.generate_content([prompt, img])
+        result = _extract_json(response.text)
+        return result if isinstance(result, dict) else {}
+    except Exception as e:
+        return {"error": str(e)[:200]}
 
 
 async def generate_contact_summary(contact: dict) -> str:

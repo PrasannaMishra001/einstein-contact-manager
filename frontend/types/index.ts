@@ -21,6 +21,16 @@ export interface Address {
   zip_code?: string;
 }
 
+export interface SocialLinks {
+  linkedin?: string | null;
+  twitter?: string | null;
+  instagram?: string | null;
+  website?: string | null;
+  github?: string | null;
+  youtube?: string | null;
+  [key: string]: string | null | undefined;
+}
+
 export interface Contact {
   id: string;
   name: string;
@@ -37,6 +47,7 @@ export interface Contact {
   is_archived: boolean;
   share_token: string | null;
   tags: Tag[];
+  social_links: SocialLinks | null;
   created_at: string;
   updated_at: string;
 }
@@ -61,6 +72,7 @@ export interface ContactCreate {
   notes?: string;
   is_favorite?: boolean;
   tag_ids?: string[];
+  social_links?: SocialLinks | null;
 }
 
 export interface AuthResponse {
@@ -103,6 +115,14 @@ export interface DuplicateGroup {
   contacts: Contact[];
   similarity_score: number;
   reason: string;
+}
+
+export interface SmartDuplicateGroup {
+  ids: string[];
+  names: string[];
+  similarity_score: number;
+  reason: string;
+  contacts: Contact[];
 }
 
 export interface Reminder {

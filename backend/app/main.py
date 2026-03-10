@@ -4,7 +4,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
-from app.api import auth, contacts, ai, import_export, analytics, sharing, reminders, webhooks, sse
+from app.api import auth, contacts, ai, import_export, analytics, sharing, reminders, webhooks, sse, google
 
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ app.include_router(sharing.router, prefix=prefix)
 app.include_router(reminders.router, prefix=prefix)
 app.include_router(webhooks.router, prefix=prefix)
 app.include_router(sse.router, prefix=prefix)
+app.include_router(google.router, prefix=prefix)
 
 
 @app.get("/")

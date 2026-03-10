@@ -2,63 +2,297 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 239 84% 67%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 239 84% 67%;
-    --radius: 0.75rem;
-  }
+/* ═══════════════════════════════════════════════════════════════
+   NEO-BRUTALISM DESIGN TOKENS
+   Source: neobrutalism.dev + shadcn neobrutalism theme
+   Contrast rules:
+     - Black text on ALL -300 range accents (yellow, cyan, pink, green, orange, purple, red)
+     - White text ONLY on black
+     - Borders always #000, shadows always solid black offset
+   ══════════════════════════════════════════════════════════════ */
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 239 84% 67%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 239 84% 67%;
-  }
+/* CSS @property for animated border (conic gradient angle) */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  /* ── Accent palette ─────────────────────────────────────── */
+  --nb-yellow:  #FDE047;   /* yellow-300  — black text */
+  --nb-cyan:    #67E8F9;   /* cyan-300    — black text */
+  --nb-pink:    #F9A8D4;   /* pink-300    — black text */
+  --nb-purple:  #D8B4FE;   /* purple-300  — black text */
+  --nb-green:   #86EFAC;   /* green-300   — black text */
+  --nb-orange:  #FDBA74;   /* orange-300  — black text */
+  --nb-red:     #FCA5A5;   /* red-300     — black text */
+
+  /* ── Neutrals ───────────────────────────────────────────── */
+  --nb-black: #000000;
+  --nb-white: #FFFFFF;
+  --nb-cream: #FAFAF0;
+
+  /* ── Shadows ────────────────────────────────────────────── */
+  --nb-shadow-xs: 2px 2px 0 0 #000;
+  --nb-shadow-sm: 3px 3px 0 0 #000;
+  --nb-shadow:    4px 4px 0 0 #000;
+  --nb-shadow-lg: 6px 6px 0 0 #000;
+  --nb-shadow-xl: 8px 8px 0 0 #000;
+
+  /* ── Tailwind semantic bridge ───────────────────────────── */
+  --background:           55 96% 97%;
+  --foreground:            0  0%  4%;
+  --card:                  0  0% 100%;
+  --card-foreground:       0  0%  4%;
+  --popover:               0  0% 100%;
+  --popover-foreground:    0  0%  4%;
+  --primary:              52 98% 57%;
+  --primary-foreground:    0  0%  0%;
+  --secondary:             0  0% 100%;
+  --secondary-foreground:  0  0%  0%;
+  --muted:                55 20% 92%;
+  --muted-foreground:      0  0% 42%;
+  --accent:               52 98% 85%;
+  --accent-foreground:     0  0%  0%;
+  --destructive:           0 72% 51%;
+  --destructive-foreground:0  0% 100%;
+  --border:                0  0%  0%;
+  --input:                 0  0%  0%;
+  --ring:                 52 98% 57%;
+  --radius:               0rem;
+
+  /* ── Legacy aliases ─────────────────────────────────────── */
+  --neo-shadow:    var(--nb-shadow);
+  --neo-shadow-sm: var(--nb-shadow-xs);
+  --neo-shadow-lg: var(--nb-shadow-lg);
+  --neo-shadow-xl: var(--nb-shadow-xl);
+}
+
+/* ── Dark mode ── high-contrast, dark background with light text ─ */
+.dark {
+  --background:            0  0%  9%;
+  --foreground:            0  0% 95%;   /* near-white so text is ALWAYS visible */
+  --card:                  0  0% 13%;
+  --card-foreground:       0  0% 95%;
+  --popover:               0  0% 13%;
+  --popover-foreground:    0  0% 95%;
+  --primary:              52 98% 57%;
+  --primary-foreground:    0  0%  0%;
+  --secondary:             0  0% 18%;
+  --secondary-foreground:  0  0% 95%;
+  --muted:                 0  0% 20%;
+  --muted-foreground:      0  0% 65%;
+  --accent:                0  0% 18%;
+  --accent-foreground:     0  0% 95%;
+  --destructive:           0 62% 42%;
+  --destructive-foreground:0  0% 100%;
+  --border:                0  0% 80%;
+  --input:                 0  0% 80%;
+  --ring:                 52 98% 57%;
 }
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Headings inherit color — prevents dark-mode --foreground bleeding into
+     coloured hero sections where text should always be black */
+  h1, h2, h3, h4, h5, h6 {
+    color: inherit;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { @apply bg-transparent; }
-::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground; }
+@layer components {
 
-/* Smooth transitions */
-* { transition-property: color, background-color, border-color; transition-duration: 150ms; }
+  /* ── Cards ────────────────────────────────────────────── */
+  .neo-card {
+    @apply border-2 border-black bg-white;
+    box-shadow: var(--nb-shadow);
+  }
+  .neo-card-sm {
+    @apply border-2 border-black bg-white;
+    box-shadow: var(--nb-shadow-xs);
+  }
+  .dark .neo-card,
+  .dark .neo-card-sm {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-color: hsl(var(--border));
+  }
+
+  /* ── Buttons ──────────────────────────────────────────── */
+  .neo-btn {
+    @apply border-2 border-black font-black uppercase tracking-wide transition-all
+           inline-flex items-center justify-center gap-2 cursor-pointer select-none;
+    box-shadow: var(--nb-shadow);
+  }
+  .neo-btn:hover   { transform: translate(3px, 3px); box-shadow: none; }
+  .neo-btn:active  { transform: translate(4px, 4px); box-shadow: none; }
+  .neo-btn:disabled { opacity: 0.5; transform: none; box-shadow: var(--nb-shadow); cursor: not-allowed; }
+
+  /* WCAG AA: all light accents → black text, only black bg → white text */
+  .neo-btn-primary { @apply neo-btn bg-yellow-300 text-black; }
+  .neo-btn-white   { @apply neo-btn bg-white   text-black; }
+  .neo-btn-black   { @apply neo-btn bg-black   text-white border-black; }
+  .neo-btn-cyan    { @apply neo-btn bg-cyan-300 text-black; }
+  .neo-btn-green   { @apply neo-btn bg-green-300 text-black; }
+  .neo-btn-orange  { @apply neo-btn bg-orange-300 text-black; }
+  .neo-btn-pink    { @apply neo-btn bg-pink-300  text-black; }   /* was pink-400+white = fail */
+  .neo-btn-purple  { @apply neo-btn bg-purple-300 text-black; }
+  .neo-btn-red     { @apply neo-btn bg-red-300   text-black; }   /* was red-400+white = fail */
+
+  /* ── Input ────────────────────────────────────────────── */
+  .neo-input {
+    @apply border-2 border-black bg-white text-black w-full px-3 py-2.5 text-sm font-medium focus:outline-none;
+    box-shadow: var(--nb-shadow-xs);
+  }
+  .neo-input:focus {
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.1), var(--nb-shadow-xs);
+  }
+  .dark .neo-input {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-color: hsl(var(--border));
+  }
+
+  /* ── Badge ────────────────────────────────────────────── */
+  .neo-badge {
+    @apply border-2 border-black text-black text-xs font-black uppercase
+           tracking-wider px-2 py-0.5 inline-block;
+    box-shadow: var(--nb-shadow-xs);
+  }
+  .dark .neo-badge {
+    border-color: hsl(var(--border));
+  }
+
+  /* ── Table ────────────────────────────────────────────── */
+  .neo-table { @apply border-2 border-black w-full text-sm; }
+  .neo-table th {
+    @apply border-b-2 border-black bg-yellow-300 text-black font-black uppercase
+           tracking-wide text-left px-4 py-3 text-xs;
+  }
+  .neo-table td             { @apply border-b-2 border-black px-4 py-3; }
+  .neo-table tr:last-child td { @apply border-b-0; }
+  .neo-table tr:hover td      { @apply bg-yellow-50; }
+  .dark .neo-table           { border-color: hsl(var(--border)); }
+  .dark .neo-table th        { @apply bg-yellow-500 text-black; }
+  .dark .neo-table td        { border-color: hsl(var(--border)); color: hsl(var(--card-foreground)); }
+  .dark .neo-table tr:hover td { background: hsl(var(--muted)); }
+
+  /* ── Sidebar ──────────────────────────────────────────── */
+  .neo-sidebar { @apply border-r-4 border-black bg-yellow-300 h-screen; }
+  .dark .neo-sidebar {
+    background: #111108;
+    border-right: 4px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+
+  /* ── Animated border (conic gradient spin) ────────────── */
+  .border-spin {
+    position: relative;
+    isolation: isolate;
+  }
+  .border-spin::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    background: conic-gradient(from var(--angle), #FDE047 0%, #67E8F9 25%, #F9A8D4 50%, #86EFAC 75%, #FDE047 100%);
+    animation: spin-border 4s linear infinite;
+  }
+  @keyframes spin-border {
+    to { --angle: 360deg; }
+  }
+
+  /* ── Shimmer sweep (on hover) ─────────────────────────── */
+  .neo-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .neo-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.55) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: none;
+  }
+  .neo-shine:hover::after {
+    animation: shine-sweep 0.45s ease-out forwards;
+  }
+  @keyframes shine-sweep {
+    to { transform: translateX(100%); }
+  }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #000; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
+.dark ::-webkit-scrollbar-thumb { background: hsl(var(--border)); }
+
+/* ── Selection — peach-orange so it doesn't clash with yellow UI ── */
+::selection { background: #FDBA74; color: #000; }   /* orange-300 */
+
+/* ── Background patterns (add as <div> inside relative overflow-hidden) ── */
+.bg-grid-pattern {
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,  #000 0, #000 1px, transparent 0, transparent 40px),
+    repeating-linear-gradient(90deg, #000 0, #000 1px, transparent 0, transparent 40px);
+  opacity: 0.055;
+  pointer-events: none;
+}
+.bg-dot-pattern {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(#000 1px, transparent 0);
+  background-size: 20px 20px;
+  opacity: 0.055;
+  pointer-events: none;
+}
+
+/* ── Dynamic tag color ─────────────────────────────────────── */
+.tag-color-bg { background-color: var(--tag-color, #D8B4FE); }
+
+/* ── Animation keyframes ───────────────────────────────────── */
+@keyframes slide-in  { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slide-up  { from { transform: translateY( 8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer   { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes wiggle    { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes float     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes marquee   { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Marquee utility (avoids inline animation style) */
+.animate-marquee { animation: marquee 28s linear infinite; }
+
+/* Slide-up variants with baked-in delays (avoids inline animationDelay style) */
+.animate-slide-up-1 { animation: slide-up 0.4s ease-out 80ms  both; }
+.animate-slide-up-2 { animation: slide-up 0.4s ease-out 160ms both; }
+
+/* Scroll-driven reveal (CSS native, Chrome 115+ / Safari 17.2+) */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-reveal {
+  animation: reveal-up 0.5s ease-out both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 50%;
+}
+
+/* Feature card stagger delays — use class instead of inline --delay var */
+.stagger-0 { animation-delay:   0ms; }
+.stagger-1 { animation-delay:  60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }

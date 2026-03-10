@@ -115,9 +115,17 @@ next-env.d.ts
 
 # Backend env
 backend/.env
+backend/.env.docker
 .env
 .env.local
 .env.production
+
+# SQLite dev database (never commit real data)
+backend/einstein_dev.db
+*.db
+
+# Temp deployment reference (contains real keys)
+docs/TEMP_ENV_VALUES.md
 
 # Alembic
 backend/alembic/versions/*.pyc
