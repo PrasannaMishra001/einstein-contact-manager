@@ -1,8 +1,9 @@
-"""Google Contacts sync — OAuth 2.0 + People API write."""
+"""Google Contacts sync — OAuth 2.0 + People API (two-way)."""
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from pydantic import BaseModel
 import asyncio
 
 from app.auth import get_current_user
@@ -43,6 +44,28 @@ def _get_credentials(user: User):
         client_secret=settings.GOOGLE_CLIENT_SECRET,
         scopes=SCOPES,
     )
+
+
+def _build_person_body(cd: dict) -> dict:
+    """Build a Google People API person body from contact data."""
+    parts = cd["name"].strip().rsplit(" ", 1)
+    given = parts[0]
+    family = parts[1] if len(parts) > 1 else ""
+    person: dict = {
+        "names": [{"givenName": given, "familyName": family, "displayName": cd["name"]}],
+    }
+    if cd.get("email"):
+        person["emailAddresses"] = [{"value": cd["email"], "type": "work"}]
+    if cd.get("phone"):
+        person["phoneNumbers"] = [{"value": cd["phone"], "type": "mobile"}]
+    if cd.get("company"):
+        org: dict = {"name": cd["company"]}
+        if cd.get("job_title"):
+            org["title"] = cd["job_title"]
+        person["organizations"] = [org]
+    if cd.get("notes"):
+        person["biographies"] = [{"value": cd["notes"], "contentType": "TEXT_PLAIN"}]
+    return person
 
 
 # ── OAuth ──────────────────────────────────────────────────────────────────────
@@ -95,38 +118,126 @@ async def google_status(current_user: User = Depends(get_current_user)):
     return {"connected": bool(current_user.google_access_token)}
 
 
-# ── Preview ────────────────────────────────────────────────────────────────────
+# ── Contacts with sync status ──────────────────────────────────────────────────
 
-@router.get("/preview")
-async def google_preview(
+@router.get("/contacts-with-status")
+async def contacts_with_status(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Einstein contacts not yet pushed to Google (no google_resource_name)."""
+    """Return all contacts with 3-way status: synced / einstein_only / google_only."""
+    if not current_user.google_access_token:
+        raise HTTPException(400, detail="Google not connected")
+
+    creds = _get_credentials(current_user)
+
+    def _fetch_google():
+        from googleapiclient.discovery import build
+        from google.auth.transport.requests import Request
+        if not creds.valid and creds.refresh_token:
+            creds.refresh(Request())
+        service = build("people", "v1", credentials=creds)
+        result = service.people().connections().list(
+            resourceName="people/me",
+            pageSize=500,
+            personFields="names,emailAddresses,phoneNumbers,organizations,photos",
+        ).execute()
+        items = []
+        for person in result.get("connections", []):
+            names = person.get("names", [])
+            name = names[0].get("displayName", "") if names else ""
+            if not name:
+                continue
+            emails = person.get("emailAddresses", [])
+            phones = person.get("phoneNumbers", [])
+            orgs = person.get("organizations", [])
+            photos = person.get("photos", [])
+            photo_url = None
+            for p in photos:
+                if not p.get("default"):
+                    photo_url = p.get("url")
+                    break
+            items.append({
+                "resource_name": person.get("resourceName", ""),
+                "name": name,
+                "email": emails[0].get("value") if emails else None,
+                "phone": phones[0].get("value") if phones else None,
+                "company": orgs[0].get("name") if orgs else None,
+                "job_title": orgs[0].get("title") if orgs else None,
+                "photo_url": photo_url,
+            })
+        return items, creds.token
+
+    loop = asyncio.get_event_loop()
+    google_contacts, new_token = await loop.run_in_executor(None, _fetch_google)
+
+    # Get all non-archived Einstein contacts
     result = await db.execute(
         select(Contact)
         .where(Contact.user_id == current_user.id)
-        .where(Contact.google_resource_name.is_(None))
         .where(Contact.is_archived == False)
     )
-    contacts = result.scalars().all()
-    return {
-        "count": len(contacts),
-        "contacts": [
-            {
+    einstein_contacts = result.scalars().all()
+
+    # Build lookup: resource_name → einstein contact
+    rn_to_einstein = {c.google_resource_name: c for c in einstein_contacts if c.google_resource_name}
+    google_rns = {gc["resource_name"] for gc in google_contacts}
+
+    synced = []
+    einstein_only = []
+    google_only = []
+
+    for c in einstein_contacts:
+        if c.google_resource_name and c.google_resource_name in google_rns:
+            gc_match = next((g for g in google_contacts if g["resource_name"] == c.google_resource_name), None)
+            synced.append({
+                "id": c.id,
+                "resource_name": c.google_resource_name,
+                "name": c.name,
+                "email": c.email,
+                "phone": c.phone,
+                "company": c.company,
+                "job_title": c.job_title,
+                "photo_url": c.photo_url or (gc_match["photo_url"] if gc_match else None),
+                "status": "synced",
+            })
+        elif not c.google_resource_name:
+            einstein_only.append({
                 "id": c.id,
                 "name": c.name,
                 "email": c.email,
                 "phone": c.phone,
                 "company": c.company,
                 "job_title": c.job_title,
-            }
-            for c in contacts
-        ],
+                "photo_url": c.photo_url,
+                "status": "einstein_only",
+            })
+
+    for gc in google_contacts:
+        if gc["resource_name"] not in rn_to_einstein:
+            google_only.append({
+                "resource_name": gc["resource_name"],
+                "name": gc["name"],
+                "email": gc["email"],
+                "phone": gc["phone"],
+                "company": gc["company"],
+                "job_title": gc["job_title"],
+                "photo_url": gc["photo_url"],
+                "status": "google_only",
+            })
+
+    if new_token and new_token != current_user.google_access_token:
+        current_user.google_access_token = new_token
+        await db.commit()
+
+    return {
+        "synced": synced,
+        "einstein_only": einstein_only,
+        "google_only": google_only,
     }
 
 
-# ── Sync ───────────────────────────────────────────────────────────────────────
+# ── Sync all Einstein-only → Google ───────────────────────────────────────────
 
 @router.post("/sync")
 async def google_sync(
@@ -137,7 +248,6 @@ async def google_sync(
     if not current_user.google_access_token:
         raise HTTPException(400, detail="Google not connected — authorise first")
 
-    # Load unsynced contacts
     result = await db.execute(
         select(Contact)
         .where(Contact.user_id == current_user.id)
@@ -148,17 +258,9 @@ async def google_sync(
     if not contacts:
         return {"synced": 0, "errors": [], "total": 0}
 
-    # Snapshot data so the executor thread doesn't touch the async session
     contact_data = [
-        {
-            "id": c.id,
-            "name": c.name,
-            "email": c.email,
-            "phone": c.phone,
-            "company": c.company,
-            "job_title": c.job_title,
-            "notes": c.notes,
-        }
+        {"id": c.id, "name": c.name, "email": c.email, "phone": c.phone,
+         "company": c.company, "job_title": c.job_title, "notes": c.notes}
         for c in contacts
     ]
 
@@ -171,8 +273,7 @@ async def google_sync(
         from google.auth.transport.requests import Request
 
         creds = Credentials(
-            token=token,
-            refresh_token=refresh_token,
+            token=token, refresh_token=refresh_token,
             token_uri="https://oauth2.googleapis.com/token",
             client_id=settings.GOOGLE_CLIENT_ID,
             client_secret=settings.GOOGLE_CLIENT_SECRET,
@@ -186,25 +287,7 @@ async def google_sync(
 
         for cd in contact_data:
             try:
-                parts = cd["name"].strip().rsplit(" ", 1)
-                given = parts[0]
-                family = parts[1] if len(parts) > 1 else ""
-                person: dict = {
-                    "names": [{"givenName": given, "familyName": family, "displayName": cd["name"]}],
-                }
-                if cd.get("email"):
-                    person["emailAddresses"] = [{"value": cd["email"], "type": "work"}]
-                if cd.get("phone"):
-                    person["phoneNumbers"] = [{"value": cd["phone"], "type": "mobile"}]
-                if cd.get("company"):
-                    org: dict = {"name": cd["company"]}
-                    if cd.get("job_title"):
-                        org["title"] = cd["job_title"]
-                    person["organizations"] = [org]
-                if cd.get("notes"):
-                    person["biographies"] = [{"value": cd["notes"], "contentType": "TEXT_PLAIN"}]
-
-                res = service.people().createContact(body=person).execute()
+                res = service.people().createContact(body=_build_person_body(cd)).execute()
                 resource_names[cd["id"]] = res.get("resourceName", "synced")
                 synced += 1
             except Exception as exc:
@@ -215,72 +298,100 @@ async def google_sync(
     loop = asyncio.get_event_loop()
     synced, errors, resource_names, new_token = await loop.run_in_executor(None, _do_sync)
 
-    # Persist resource names
-    if resource_names:
-        for c in contacts:
-            if c.id in resource_names:
-                c.google_resource_name = resource_names[c.id]
-
-    # Persist refreshed access token if changed
+    for c in contacts:
+        if c.id in resource_names:
+            c.google_resource_name = resource_names[c.id]
     if new_token and new_token != current_user.google_access_token:
         current_user.google_access_token = new_token
-
     await db.commit()
     return {"synced": synced, "errors": errors, "total": len(contacts)}
 
 
-# ── Import from Google ────────────────────────────────────────────────────────
+# ── Selective export ───────────────────────────────────────────────────────────
 
-@router.get("/list-contacts")
-async def list_google_contacts(
+class SelectiveExportRequest(BaseModel):
+    contact_ids: list[str]
+
+
+@router.post("/selective-export")
+async def selective_export(
+    req: SelectiveExportRequest,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Fetch the user's Google Contacts for preview before import."""
+    """Export specific Einstein contacts (by ID) to Google Contacts."""
     if not current_user.google_access_token:
         raise HTTPException(400, detail="Google not connected")
+    if not req.contact_ids:
+        return {"exported": 0, "errors": [], "total": 0}
 
-    creds = _get_credentials(current_user)
+    result = await db.execute(
+        select(Contact)
+        .where(Contact.user_id == current_user.id)
+        .where(Contact.id.in_(req.contact_ids))
+    )
+    contacts = result.scalars().all()
 
-    def _fetch():
+    contact_data = [
+        {"id": c.id, "name": c.name, "email": c.email, "phone": c.phone,
+         "company": c.company, "job_title": c.job_title, "notes": c.notes,
+         "google_resource_name": c.google_resource_name}
+        for c in contacts
+    ]
+
+    token = current_user.google_access_token
+    refresh_token = current_user.google_refresh_token
+
+    def _do_export():
         from googleapiclient.discovery import build
+        from google.oauth2.credentials import Credentials
         from google.auth.transport.requests import Request
+
+        creds = Credentials(
+            token=token, refresh_token=refresh_token,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=settings.GOOGLE_CLIENT_ID,
+            client_secret=settings.GOOGLE_CLIENT_SECRET,
+            scopes=SCOPES,
+        )
         if not creds.valid and creds.refresh_token:
             creds.refresh(Request())
+
         service = build("people", "v1", credentials=creds)
-        result = service.people().connections().list(
-            resourceName="people/me", pageSize=500,
-            personFields="names,emailAddresses,phoneNumbers,organizations",
-        ).execute()
-        items = []
-        for person in result.get("connections", []):
-            names = person.get("names", [])
-            name = names[0].get("displayName", "") if names else ""
-            if not name:
-                continue
-            emails = person.get("emailAddresses", [])
-            phones = person.get("phoneNumbers", [])
-            orgs = person.get("organizations", [])
-            items.append({
-                "resource_name": person.get("resourceName", ""),
-                "name": name,
-                "email": emails[0].get("value") if emails else None,
-                "phone": phones[0].get("value") if phones else None,
-                "company": orgs[0].get("name") if orgs else None,
-                "job_title": orgs[0].get("title") if orgs else None,
-            })
-        return items, creds.token
+        exported, errors, resource_names = 0, [], {}
+
+        for cd in contact_data:
+            if cd.get("google_resource_name"):
+                continue  # already synced
+            try:
+                res = service.people().createContact(body=_build_person_body(cd)).execute()
+                resource_names[cd["id"]] = res.get("resourceName", "synced")
+                exported += 1
+            except Exception as exc:
+                errors.append(f"{cd['name']}: {str(exc)[:100]}")
+
+        return exported, errors, resource_names, creds.token
 
     loop = asyncio.get_event_loop()
-    items, new_token = await loop.run_in_executor(None, _fetch)
-    return {"contacts": items, "count": len(items)}
+    exported, errors, resource_names, new_token = await loop.run_in_executor(None, _do_export)
 
+    for c in contacts:
+        if c.id in resource_names:
+            c.google_resource_name = resource_names[c.id]
+    if new_token and new_token != current_user.google_access_token:
+        current_user.google_access_token = new_token
+    await db.commit()
+    return {"exported": exported, "errors": errors, "total": len(contacts)}
+
+
+# ── Import from Google ────────────────────────────────────────────────────────
 
 @router.post("/import-contacts")
 async def import_google_contacts(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Import all Google Contacts into Einstein (skip already-imported ones)."""
+    """Import all Google Contacts into Einstein (with photos). Already-imported ones are skipped."""
     if not current_user.google_access_token:
         raise HTTPException(400, detail="Google not connected")
 
@@ -294,8 +405,9 @@ async def import_google_contacts(
             creds.refresh(Request())
         service = build("people", "v1", credentials=creds)
         result = service.people().connections().list(
-            resourceName="people/me", pageSize=500,
-            personFields="names,emailAddresses,phoneNumbers,organizations,birthdays",
+            resourceName="people/me",
+            pageSize=500,
+            personFields="names,emailAddresses,phoneNumbers,organizations,birthdays,photos",
         ).execute()
         items = []
         for person in result.get("connections", []):
@@ -307,6 +419,7 @@ async def import_google_contacts(
             phones = person.get("phoneNumbers", [])
             orgs = person.get("organizations", [])
             bdays = person.get("birthdays", [])
+            photos = person.get("photos", [])
             bday = None
             if bdays:
                 bd = bdays[0].get("date", {})
@@ -314,6 +427,11 @@ async def import_google_contacts(
                     bday = _date(bd.get("year", 2000), bd.get("month", 1), bd.get("day", 1))
                 except Exception:
                     pass
+            photo_url = None
+            for p in photos:
+                if not p.get("default"):
+                    photo_url = p.get("url")
+                    break
             items.append({
                 "resource_name": person.get("resourceName", ""),
                 "name": name,
@@ -322,13 +440,13 @@ async def import_google_contacts(
                 "company": orgs[0].get("name") if orgs else None,
                 "job_title": orgs[0].get("title") if orgs else None,
                 "birthday": bday,
+                "photo_url": photo_url,
             })
         return items, creds.token
 
     loop = asyncio.get_event_loop()
     google_contacts, new_token = await loop.run_in_executor(None, _fetch_all)
 
-    # Get already-imported resource names
     existing_result = await db.execute(
         select(Contact.google_resource_name)
         .where(Contact.user_id == current_user.id)
@@ -348,6 +466,7 @@ async def import_google_contacts(
             company=gc["company"],
             job_title=gc["job_title"],
             birthday=gc["birthday"],
+            photo_url=gc["photo_url"],
             google_resource_name=gc["resource_name"],
         ))
         added += 1

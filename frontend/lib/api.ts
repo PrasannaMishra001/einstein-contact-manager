@@ -138,14 +138,32 @@ export const remindersAPI = {
 };
 
 // ── Google Contacts Sync ──────────────────────────────────────────────────────
+type GContact = {
+  id?: string;
+  resource_name?: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  job_title?: string;
+  photo_url?: string;
+  status: "synced" | "einstein_only" | "google_only";
+};
+type ContactsWithStatusResponse = {
+  synced: GContact[];
+  einstein_only: GContact[];
+  google_only: GContact[];
+};
+
 export const googleAPI = {
   status: () => api.get<{ connected: boolean }>("/google/status"),
   auth: () => api.get<{ auth_url: string }>("/google/auth"),
-  preview: () => api.get<{ count: number; contacts: Array<{ id: string; name: string; email?: string; phone?: string; company?: string; job_title?: string }> }>("/google/preview"),
   sync: () => api.post<{ synced: number; errors: string[]; total: number }>("/google/sync"),
   disconnect: () => api.delete<{ disconnected: boolean }>("/google/disconnect"),
-  listContacts: () => api.get<{ contacts: Array<{ resource_name: string; name: string; email?: string; phone?: string; company?: string; job_title?: string }>; count: number }>("/google/list-contacts"),
   importContacts: () => api.post<{ added: number; skipped: number; total: number }>("/google/import-contacts"),
+  contactsWithStatus: () => api.get<ContactsWithStatusResponse>("/google/contacts-with-status"),
+  selectiveExport: (contact_ids: string[]) =>
+    api.post<{ exported: number; errors: string[]; total: number }>("/google/selective-export", { contact_ids }),
 };
 
 // ── Webhooks ──────────────────────────────────────────────────────────────────
