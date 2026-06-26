@@ -40,28 +40,28 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cyan-300 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-cyan-300 dark:bg-[#0B0D14] p-4 relative overflow-hidden transition-colors">
       <div className="bg-dot-pattern" />
 
       <div className="relative w-full max-w-md">
         {/* Offset shadow */}
-        <div className="absolute inset-0 translate-x-3 translate-y-3 border-4 border-black bg-yellow-300" />
+        <div className="absolute inset-0 translate-x-3 translate-y-3 border-4 border-black dark:border-white/20 bg-yellow-300 dark:bg-indigo-950" />
 
-        <div className="relative border-4 border-black bg-white p-8">
+        <div className="relative border-4 border-black dark:border-white/30 bg-white dark:bg-[#161A24] p-8">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b-2 border-black">
-            <div className="w-12 h-12 border-2 border-black bg-black flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3 mb-8 pb-6 border-b-2 border-black dark:border-white/20">
+            <div className="w-12 h-12 border-2 border-black dark:border-white/30 bg-black flex items-center justify-center shrink-0">
               <Zap className="w-7 h-7 text-yellow-300" />
             </div>
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tight leading-none">Einstein</h1>
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-black/60">Contact Manager</p>
+              <h1 className="text-2xl font-black uppercase tracking-tight leading-none text-black dark:text-white">Einstein</h1>
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-black/60 dark:text-white/55">Contact Manager</p>
             </div>
           </div>
 
           <div className="mb-6">
-            <h2 className="text-3xl font-black uppercase tracking-tight">Create Account</h2>
-            <p className="text-sm font-bold text-black/60 mt-1">Start managing contacts smarter</p>
+            <h2 className="text-3xl font-black uppercase tracking-tight text-black dark:text-white">Create Account</h2>
+            <p className="text-sm font-bold text-black/60 dark:text-white/55 mt-1">Start managing contacts smarter</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -93,8 +93,8 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t-2 border-black">
-            <p className="text-sm font-bold text-center">
+          <div className="mt-6 pt-5 border-t-2 border-black dark:border-white/20">
+            <p className="text-sm font-bold text-center text-black dark:text-white">
               Already have an account?{" "}
               <Link href="/login" className="font-black underline underline-offset-4 hover:text-yellow-600 transition-colors">
                 Sign in
