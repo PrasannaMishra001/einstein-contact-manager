@@ -69,28 +69,51 @@
   --neo-shadow-xl: var(--nb-shadow-xl);
 }
 
-/* ── Dark mode ── high-contrast, dark background with light text ─ */
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE — "MIDNIGHT INDIGO"
+   A deliberate night counterpart of the light theme (not a flat grey
+   invert). Deep blue-black canvas, indigo-tinted surfaces, the signature
+   yellow kept as a warm glow, bright accents preserved for neo-brutalist
+   pop. Borders are soft light-on-dark; shadows stay solid for depth.
+   ══════════════════════════════════════════════════════════════ */
 .dark {
-  --background:            0  0%  9%;
-  --foreground:            0  0% 95%;   /* near-white so text is ALWAYS visible */
-  --card:                  0  0% 13%;
-  --card-foreground:       0  0% 95%;
-  --popover:               0  0% 13%;
-  --popover-foreground:    0  0% 95%;
-  --primary:              52 98% 57%;
-  --primary-foreground:    0  0%  0%;
-  --secondary:             0  0% 18%;
-  --secondary-foreground:  0  0% 95%;
-  --muted:                 0  0% 20%;
-  --muted-foreground:      0  0% 65%;
-  --accent:                0  0% 18%;
-  --accent-foreground:     0  0% 95%;
-  --destructive:           0 62% 42%;
-  --destructive-foreground:0  0% 100%;
-  --border:                0  0% 80%;
-  --input:                 0  0% 80%;
-  --ring:                 52 98% 57%;
+  /* ── Canvas & surfaces (rising elevation = lighter) ───────── */
+  --background:           226 30%  6%;   /* #0B0D14  page */
+  --foreground:           220 20% 92%;   /* #E6E9EF  near-white text */
+  --card:                 224 24% 11%;   /* #161A24  card surface */
+  --card-foreground:      220 20% 92%;
+  --popover:              224 24% 14%;   /* #1B202C  raised popover */
+  --popover-foreground:   220 20% 92%;
+  --primary:               48 96% 60%;   /* #FBCB30  warm yellow glow */
+  --primary-foreground:   224 40%  7%;
+  --secondary:            224 20% 16%;   /* #20242F  inputs / chips */
+  --secondary-foreground: 220 20% 92%;
+  --muted:                224 18% 18%;   /* #242935 */
+  --muted-foreground:     220 14% 68%;   /* #A0A6B6  dimmed text (AA on card) */
+  --accent:               234 42% 24%;   /* #25295A  indigo accent */
+  --accent-foreground:    220 22% 95%;
+  --destructive:            0 70% 58%;   /* #E25555  brighter so it reads on dark */
+  --destructive-foreground: 0  0% 100%;
+  --border:               224 16% 28%;   /* #3B4252  soft, visible hard-edge */
+  --input:                224 16% 32%;
+  --ring:                  48 96% 60%;
+
+  /* Shadows: solid + slightly blue-black so neo-brutalist depth survives
+     against the indigo canvas (cards sit a notch lighter than the page). */
+  --nb-shadow-xs: 2px 2px 0 0 #03050b;
+  --nb-shadow-sm: 3px 3px 0 0 #03050b;
+  --nb-shadow:    4px 4px 0 0 #03050b;
+  --nb-shadow-lg: 6px 6px 0 0 #03050b;
+  --nb-shadow-xl: 8px 8px 0 0 #03050b;
 }
+
+/* Re-map the Tailwind shadow-neo* utilities in dark mode (they are hard-coded
+   black and would vanish on the dark canvas). Two-class selector wins on
+   specificity over the single-class utility. */
+.dark .shadow-neo    { box-shadow: 4px 4px 0 0 #03050b; }
+.dark .shadow-neo-sm { box-shadow: 2px 2px 0 0 #03050b; }
+.dark .shadow-neo-lg { box-shadow: 6px 6px 0 0 #03050b; }
+.dark .shadow-neo-xl { box-shadow: 8px 8px 0 0 #03050b; }
 
 @layer base {
   * { @apply border-border; }
@@ -189,7 +212,7 @@
   /* ── Sidebar ──────────────────────────────────────────── */
   .neo-sidebar { @apply border-r-4 border-black bg-yellow-300 h-screen; }
   .dark .neo-sidebar {
-    background: #111108;
+    background: #11141D;
     border-right: 4px solid hsl(var(--border));
     color: hsl(var(--foreground));
   }
