@@ -28,7 +28,7 @@ const ticker = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-yellow-300 dark:bg-neutral-950 text-black dark:text-white transition-colors">
+    <div className="min-h-screen bg-yellow-300 dark:bg-[#0B0D14] text-black dark:text-white transition-colors">
       {/* Grid background */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="bg-grid-pattern" />
@@ -59,7 +59,7 @@ export default function LandingPage() {
       {/* ── Hero ───────────────────────────────────────── */}
       <div className="max-w-4xl mx-auto px-6 pt-20 pb-12 text-center relative">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 border-2 border-black bg-white px-4 py-1.5 text-sm font-black uppercase tracking-wide shadow-neo-sm mb-8 animate-slide-in">
+        <div className="inline-flex items-center gap-2 border-2 border-black dark:border-white/15 bg-white dark:bg-[#161A24] dark:text-white px-4 py-1.5 text-sm font-black uppercase tracking-wide shadow-neo-sm mb-8 animate-slide-in">
           <Brain className="w-4 h-4" aria-hidden="true" />
           AI-Powered Contact Management
         </div>
@@ -80,11 +80,11 @@ export default function LandingPage() {
         {/* CTAs */}
         <div className="flex items-center justify-center gap-4 flex-wrap mb-16">
           <Link href="/register"
-            className="neo-shine inline-flex items-center gap-2 border-4 border-black bg-black text-yellow-300 px-8 py-4 font-black text-lg uppercase tracking-wide shadow-neo-lg hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all">
+            className="neo-shine inline-flex items-center gap-2 border-4 border-black dark:border-white/20 bg-black text-yellow-300 px-8 py-4 font-black text-lg uppercase tracking-wide shadow-neo-lg hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all">
             Start free <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </Link>
           <Link href="/login"
-            className="neo-shine inline-flex items-center gap-2 border-4 border-black bg-white text-black px-8 py-4 font-black text-lg uppercase tracking-wide shadow-neo-lg hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all">
+            className="neo-shine inline-flex items-center gap-2 border-4 border-black dark:border-white/20 bg-white dark:bg-[#161A24] text-black dark:text-white px-8 py-4 font-black text-lg uppercase tracking-wide shadow-neo-lg hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all">
             Sign in
           </Link>
         </div>
@@ -113,10 +113,10 @@ export default function LandingPage() {
 
       {/* ── Feature grid ───────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-6 py-20">
-        <h2 className="text-4xl font-black uppercase tracking-tight text-center mb-2 text-black">
+        <h2 className="text-4xl font-black uppercase tracking-tight text-center mb-2 text-black dark:text-white">
           Everything you need
         </h2>
-        <p className="text-center font-bold text-black/60 mb-12 text-sm uppercase tracking-widest">
+        <p className="text-center font-bold text-black/60 dark:text-white/55 mb-12 text-sm uppercase tracking-widest">
           One app · All your contacts
         </p>
 
@@ -124,7 +124,7 @@ export default function LandingPage() {
           {features.map((f, i) => (
             <div
               key={f.title}
-              className={`neo-shine border-4 border-black bg-white shadow-neo hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all animate-reveal stagger-${i}`}
+              className={`neo-shine border-4 border-black dark:border-white/15 bg-white dark:bg-[#161A24] shadow-neo hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all animate-reveal stagger-${i}`}
             >
               <div className={`${f.color} border-b-4 border-black px-5 py-4 flex items-center gap-3`}>
                 <div className="w-9 h-9 border-2 border-black bg-white flex items-center justify-center shrink-0 shadow-neo-sm">
@@ -133,7 +133,7 @@ export default function LandingPage() {
                 <span className="font-black uppercase tracking-wide text-sm text-black">{f.title}</span>
               </div>
               <div className="p-5">
-                <p className="text-sm font-medium leading-relaxed text-black/70">{f.desc}</p>
+                <p className="text-sm font-medium leading-relaxed text-black/70 dark:text-white/65">{f.desc}</p>
               </div>
             </div>
           ))}
@@ -141,7 +141,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── How it works ───────────────────────────────── */}
-      <div className="border-y-4 border-black bg-white dark:bg-neutral-900">
+      <div className="border-y-4 border-black bg-white dark:bg-[#11141D]">
         <div className="max-w-4xl mx-auto px-6 py-16">
           <h2 className="text-3xl font-black uppercase tracking-tight text-center mb-12 text-black dark:text-white">
             Up and running in 3 steps
@@ -173,13 +173,13 @@ export default function LandingPage() {
             { icon: Bell,  color: "bg-pink-300",   label: "Reminders",    sub: "Never forget" },
             { icon: Zap,   color: "bg-purple-300", label: "Real-time",    sub: "Live updates" },
           ].map((item) => (
-            <div key={item.label} className="border-2 border-black bg-white shadow-neo-sm flex items-center gap-3 px-4 py-3 hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+            <div key={item.label} className="border-2 border-black dark:border-white/15 bg-white dark:bg-[#161A24] shadow-neo-sm flex items-center gap-3 px-4 py-3 hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
               <div className={`${item.color} border border-black w-8 h-8 flex items-center justify-center shrink-0`}>
                 <item.icon className="w-4 h-4 text-black" aria-hidden="true" />
               </div>
               <div>
-                <div className="font-black text-xs uppercase tracking-wide text-black">{item.label}</div>
-                <div className="text-xs text-black/50 font-bold">{item.sub}</div>
+                <div className="font-black text-xs uppercase tracking-wide text-black dark:text-white">{item.label}</div>
+                <div className="text-xs text-black/50 dark:text-white/55 font-bold">{item.sub}</div>
               </div>
             </div>
           ))}
