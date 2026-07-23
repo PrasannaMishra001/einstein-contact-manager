@@ -153,6 +153,9 @@ backend/einstein_dev.db
 # Temp deployment reference (contains real keys)
 docs/TEMP_ENV_VALUES.md
 
+# Private local learning notes / engineering journal
+docs-private/
+
 # Alembic
 backend/alembic/versions/*.pyc
 
