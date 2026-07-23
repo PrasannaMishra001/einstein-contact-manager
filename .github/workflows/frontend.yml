@@ -38,6 +38,6 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
-          NEXT_PUBLIC_API_URL: https://einstein-backend.onrender.com
-          NEXT_PUBLIC_APP_URL: https://einstein.vercel.app
+          NEXT_PUBLIC_API_URL: https://einstein-backend-vaqs.onrender.com
+          NEXT_PUBLIC_APP_URL: https://iiitmgwalior.vercel.app
         run: npm run build
