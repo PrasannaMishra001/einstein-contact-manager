@@ -14,8 +14,11 @@ services:
         sync: false
       - key: DATABASE_URL_SYNC
         sync: false
+      # Set ONCE in the Render dashboard and never change it. Using
+      # generateValue here mints a new key on every deploy, which invalidates
+      # every issued JWT and logs all users out.
       - key: SECRET_KEY
-        generateValue: true
+        sync: false
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
