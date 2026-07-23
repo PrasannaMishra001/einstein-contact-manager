@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Users, BarChart2, Settings, Upload, Brain, LogOut, Moon, Sun, Menu, X, Star, Archive, Bell, Zap, Cloud } from "lucide-react";
+import { Users, BarChart2, Settings, Upload, Brain, LogOut, Moon, Sun, Menu, X, Star, Archive, Bell, Zap, Cloud, GitMerge } from "lucide-react";
 import { useTheme } from "next-themes";
 import { logout } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ const nav = [
   { href: "/reminders",                   icon: Bell,      label: "Reminders",      color: "bg-green-300",  query: null },
   { href: "/google-sync",                 icon: Cloud,     label: "Google Sync",    color: "bg-cyan-300",   query: null },
   { href: "/settings",                    icon: Settings,  label: "Settings",       color: "bg-red-300",    query: null },
+  { href: "/crdt-demo",                   icon: GitMerge,  label: "Offline Sync",   color: "bg-green-300",  query: null },
 ];
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
