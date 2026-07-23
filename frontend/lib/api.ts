@@ -5,9 +5,17 @@ import type {
   HistoryEntry, Reminder, Webhook,
 } from "@/types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+// In the browser we deliberately use a RELATIVE base so every request goes to
+// our own origin and the Next.js rewrite in next.config.ts proxies it to the
+// backend. That makes the app independent of the backend's CORS configuration —
+// calling the backend cross-origin fails outright whenever ALLOWED_ORIGINS does
+// not list this exact domain, which is invisible to curl and breaks only in a
+// real browser. On the server there is no origin to be relative to, so the
+// absolute URL is used there.
+const ABSOLUTE_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+export const API_BASE = typeof window === "undefined" ? ABSOLUTE_BASE : "";
 
-const api = axios.create({ baseURL: `${BASE}/api`, withCredentials: false });
+const api = axios.create({ baseURL: `${API_BASE}/api`, withCredentials: false });
 
 // Attach token
 api.interceptors.request.use((config) => {
@@ -28,7 +36,7 @@ api.interceptors.response.use(
       const refresh = localStorage.getItem("refresh_token");
       if (refresh) {
         try {
-          const { data } = await axios.post(`${BASE}/api/auth/refresh`, { refresh_token: refresh });
+          const { data } = await axios.post(`${API_BASE}/api/auth/refresh`, { refresh_token: refresh });
           localStorage.setItem("access_token", data.access_token);
           localStorage.setItem("refresh_token", data.refresh_token);
           original.headers.Authorization = `Bearer ${data.access_token}`;
@@ -103,9 +111,9 @@ export const aiAPI = {
 
 // ── Import / Export ───────────────────────────────────────────────────────────
 export const ioAPI = {
-  exportCSV: () => `${BASE}/api/io/export/csv`,
-  exportVCard: () => `${BASE}/api/io/export/vcard`,
-  exportJSON: () => `${BASE}/api/io/export/json`,
+  exportCSV: () => `${API_BASE}/api/io/export/csv`,
+  exportVCard: () => `${API_BASE}/api/io/export/vcard`,
+  exportJSON: () => `${API_BASE}/api/io/export/json`,
   importCSV: (file: File) => {
     const form = new FormData();
     form.append("file", file);

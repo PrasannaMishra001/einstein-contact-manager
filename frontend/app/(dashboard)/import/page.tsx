@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
-import { ioAPI, aiAPI } from "@/lib/api";
+import { ioAPI, aiAPI, API_BASE } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { Upload, Download, FileText, CheckCircle, AlertCircle, Loader2, Brain, Camera, ScanLine, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -26,7 +26,7 @@ export default function ImportPage() {
   const ocrInputRef = useRef<HTMLInputElement>(null);
 
   const token = getAccessToken();
-  const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+  const BASE = API_BASE;
 
   const importFile = async (file: File) => {
     setLoading(true);
