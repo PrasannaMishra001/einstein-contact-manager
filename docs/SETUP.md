@@ -185,7 +185,10 @@ WEBHOOK_SECRET        = <random string>
 ```
 
 5. Deploy. `alembic upgrade head` runs automatically on every deploy via build command.
-6. Note your backend URL (e.g., `https://einstein-backend.onrender.com`)
+6. Note your backend URL. Render appends a random suffix if the service name is
+   taken, so it may not match the `name:` in `render.yaml` — this deployment is
+   actually at `https://einstein-backend-vaqs.onrender.com`. Copy the exact host
+   from the Render dashboard and use it for `NEXT_PUBLIC_API_URL`.
 
 ### 3c. Frontend — Vercel (free tier)
 
