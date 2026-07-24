@@ -78,7 +78,7 @@ export default function LandingPage() {
         </p>
 
         {/* CTAs */}
-        <div className="flex items-center justify-center gap-4 flex-wrap mb-16">
+        <div className="flex items-center justify-center gap-4 flex-wrap mb-4">
           <Link href="/register"
             className="neo-shine inline-flex items-center gap-2 border-4 border-black dark:border-white/20 bg-black text-yellow-300 px-8 py-4 font-black text-lg uppercase tracking-wide shadow-neo-lg hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all">
             Start free <ArrowRight className="w-5 h-5" aria-hidden="true" />
@@ -88,6 +88,13 @@ export default function LandingPage() {
             Sign in
           </Link>
         </div>
+        <p className="text-sm font-bold text-black/70 dark:text-white/60 mb-16">
+          …or{" "}
+          <Link href="/login" className="font-black underline underline-offset-4 decoration-2 hover:text-black dark:hover:text-white transition-colors">
+            explore the live demo
+          </Link>{" "}
+          — no signup, 124 sample contacts.
+        </p>
 
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
