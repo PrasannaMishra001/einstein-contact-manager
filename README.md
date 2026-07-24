@@ -92,8 +92,10 @@ The project is being grown into a full local-first system in phases
 ([`docs/CRDT-OFFLINE-SYNC.md`](docs/CRDT-OFFLINE-SYNC.md)):
 
 - **Phase 0 — done:** the CRDT core, tests, and the public offline demo.
-- **Phase 1:** persist the real contact list to IndexedDB so the whole app is
-  local-first, not just the demo.
+- **Phase 1 — done:** the real `/contacts` page is now local-first — an
+  IndexedDB-backed CRDT replica with instant load, client-side search/sort,
+  offline reads *and* writes (queued + replayed on reconnect), an online/offline
+  sync badge, and cross-tab sync. Falls back to the server path if unavailable.
 - **Phase 2 — flagship:** **peer-to-peer sync over WebRTC** — devices exchange
   CRDT deltas directly, with the server demoted to a signaling relay (works on a
   LAN with no internet).

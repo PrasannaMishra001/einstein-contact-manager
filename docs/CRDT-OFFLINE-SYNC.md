@@ -94,8 +94,20 @@ Target architecture:
 for the contact list only. Prove: edit offline on two tabs, reconnect, watch them
 converge. This de-risks everything and gives an instant "wow" demo.
 
-**Phase 1 — local-first reads/writes.** Move the contact store to IndexedDB as
-the primary. Server becomes backup. UI reads/writes local → optimistic, instant.
+**Phase 1 — local-first reads/writes. ✅ Done.** The real `/contacts` page now
+reads from an IndexedDB-backed CRDT `Replica`: it hydrates instantly, does
+search/sort/pagination client-side, and works fully offline. Writes apply to the
+replica immediately and queue for the server, replaying on reconnect (with
+temp-id → server-id remap for contacts created offline). A `BroadcastChannel`
+keeps tabs in sync, and the page auto-falls back to the plain server path if the
+local layer can't initialise. Code: `frontend/lib/contacts/localStore.ts`,
+`frontend/lib/localdb.ts`, `frontend/lib/contacts/useLocalContacts.ts`.
+
+> **Honest caveat.** The server is not yet CRDT-aware (no HLC, no ops table), so
+> Phase 1 sync is *"local pending edits win; a server pull is authoritative for
+> everything not queued."* True multi-writer conflict-free merge across devices
+> arrives with the Phase 2 `/api/sync` endpoint below. Photo upload stays
+> online-only (Cloudinary).
 
 **Phase 2 — sync protocol.** Implement `/api/sync` (delta upload) + SSE
 fan-out + version-vector anti-entropy + tombstones. Handle re-delivery
