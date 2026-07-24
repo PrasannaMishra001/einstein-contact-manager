@@ -7,33 +7,48 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { login } from "@/lib/auth";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Zap, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Zap, ArrowRight, Sparkles } from "lucide-react";
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) });
 type FormData = z.infer<typeof schema>;
+
+// Public read-only demo account, pre-seeded with 124 celebrity contacts.
+const DEMO = { email: "einstein@einstein.com", password: "einstein" };
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  // The free Render backend cold-starts (~45 s) after idle; surface that so the
+  // button never just looks frozen.
+  const [slow, setSlow] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: FormData) => {
-    setLoading(true);
+  const attempt = async (email: string, password: string, setBusy: (b: boolean) => void) => {
+    setBusy(true);
+    setSlow(false);
+    const slowTimer = setTimeout(() => setSlow(true), 4000);
     try {
-      await login(data.email, data.password);
+      await login(email, password);
       toast.success("Welcome back!");
       router.push("/contacts");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Invalid credentials";
       toast.error(msg);
     } finally {
-      setLoading(false);
+      clearTimeout(slowTimer);
+      setSlow(false);
+      setBusy(false);
     }
   };
+
+  const onSubmit = (data: FormData) => attempt(data.email, data.password, setLoading);
+  const demoLogin = () => attempt(DEMO.email, DEMO.password, setDemoLoading);
+  const busy = loading || demoLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-300 dark:bg-[#0B0D14] p-4 relative overflow-hidden transition-colors">
@@ -85,12 +100,38 @@ export default function LoginPage() {
               {errors.password && <p className="text-red-500 text-xs font-black mt-1 uppercase">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" disabled={loading} className="neo-btn-primary w-full py-3 text-sm mt-2">
+            <button type="submit" disabled={busy} className="neo-btn-primary w-full py-3 text-sm mt-2">
               {loading ? "Signing in…" : <><span>Sign In</span><ArrowRight className="w-4 h-4 ml-2" /></>}
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t-2 border-black dark:border-white/20">
+          {/* Cold-start hint — the free backend sleeps when idle */}
+          {slow && (
+            <p className="mt-3 text-xs font-bold text-center text-black/70 dark:text-white/60 leading-relaxed">
+              Waking the server… the free backend sleeps when idle, so the first
+              request can take up to ~45 seconds. Hang tight.
+            </p>
+          )}
+
+          {/* One-click demo */}
+          <div className="mt-6 pt-5 border-t-2 border-black dark:border-white/20 space-y-3">
+            <button
+              type="button"
+              onClick={demoLogin}
+              disabled={busy}
+              className="neo-btn-black w-full py-3 text-sm"
+            >
+              {demoLoading ? "Loading demo…" : <><Sparkles className="w-4 h-4 mr-2" /><span>Explore the demo</span></>}
+            </button>
+            <p className="text-xs font-bold text-center text-black/60 dark:text-white/50">
+              No signup needed — 124 sample contacts. <br className="sm:hidden" />
+              <span className="font-mono normal-case">einstein@einstein.com</span>
+              <span className="mx-1">·</span>
+              <span className="font-mono normal-case">einstein</span>
+            </p>
+          </div>
+
+          <div className="mt-5 pt-5 border-t-2 border-black dark:border-white/20">
             <p className="text-sm font-bold text-center text-black dark:text-white">
               No account?{" "}
               <Link href="/register" className="font-black underline underline-offset-4 hover:text-yellow-600 dark:hover:text-yellow-300 transition-colors">
