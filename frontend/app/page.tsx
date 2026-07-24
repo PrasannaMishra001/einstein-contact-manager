@@ -1,10 +1,15 @@
 import Link from "next/link";
-import { Brain, Zap, Shield, Globe, ArrowRight, Layers, Merge, Users, Star, Bell } from "lucide-react";
+import { Brain, Zap, Shield, Globe, ArrowRight, Layers, Merge, Users, Star, Bell, GitMerge } from "lucide-react";
 
-const features = [
+type Feature = {
+  icon: typeof Brain; title: string; desc: string; color: string; border: string;
+  href?: string; badge?: string;
+};
+
+const features: Feature[] = [
+  { icon: GitMerge, title: "Offline Sync",        desc: "Edit on any device, even fully offline. A conflict-free replicated data type (CRDT) merges every change with zero lost writes — no conflict dialogs, ever.", color: "bg-green-300",  border: "border-green-400",  href: "/crdt-demo", badge: "New" },
   { icon: Brain,  title: "AI Search",            desc: "Ask in plain English — 'find my work contacts in Bangalore' — and get instant results.",            color: "bg-cyan-300",   border: "border-cyan-400"   },
-  { icon: Zap,    title: "Real-time Sync",        desc: "Changes sync instantly across all your devices via live server-sent events.",                       color: "bg-yellow-300", border: "border-yellow-400" },
-  { icon: Shield, title: "Privacy First",         desc: "Your data stays yours. Self-hostable, open source, zero telemetry.",                                color: "bg-green-300",  border: "border-green-400"  },
+  { icon: Zap,    title: "Real-time Updates",     desc: "Changes propagate instantly across open tabs via live server-sent events.",                        color: "bg-yellow-300", border: "border-yellow-400" },
   { icon: Globe,  title: "Google Sync",           desc: "Two-way sync with Google Contacts. Import, export, or keep both in harmony.",                       color: "bg-pink-300",   border: "border-pink-400"   },
   { icon: Merge,  title: "Smart Deduplication",  desc: "Deterministic duplicate detection with AI-assisted merge. No quota wasted.",                        color: "bg-purple-300", border: "border-purple-400" },
   { icon: Layers, title: "Import Anything",       desc: "CSV, vCard, or paste a business card and let AI extract the fields for you.",                       color: "bg-orange-300", border: "border-orange-400" },
@@ -43,7 +48,11 @@ export default function LandingPage() {
             </div>
             <span className="font-black text-xl uppercase tracking-tight text-white">Einstein</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/crdt-demo"
+              className="hidden sm:inline-flex items-center gap-1.5 border-2 border-green-300 bg-green-300 text-black px-4 py-2 text-sm font-black uppercase tracking-wide shadow-neo-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+              <GitMerge className="w-4 h-4" aria-hidden="true" /> Live Demo
+            </Link>
             <Link href="/login"
               className="border-2 border-white/60 bg-white/10 text-white px-4 py-2 text-sm font-black uppercase tracking-wide hover:bg-white/20 transition-all">
               Sign in
@@ -138,9 +147,19 @@ export default function LandingPage() {
                   <f.icon className="w-4 h-4 text-black" aria-hidden="true" />
                 </div>
                 <span className="font-black uppercase tracking-wide text-sm text-black">{f.title}</span>
+                {f.badge && (
+                  <span className="ml-auto border-2 border-black bg-black text-yellow-300 text-[10px] font-black uppercase tracking-wider px-2 py-0.5">
+                    {f.badge}
+                  </span>
+                )}
               </div>
               <div className="p-5">
                 <p className="text-sm font-medium leading-relaxed text-black/70 dark:text-white/65">{f.desc}</p>
+                {f.href && (
+                  <Link href={f.href} className="mt-3 inline-flex items-center gap-1 text-sm font-black uppercase tracking-wide text-black dark:text-white underline underline-offset-4 decoration-2 hover:text-green-600 dark:hover:text-green-400 transition-colors">
+                    Try it live <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </Link>
+                )}
               </div>
             </div>
           ))}
