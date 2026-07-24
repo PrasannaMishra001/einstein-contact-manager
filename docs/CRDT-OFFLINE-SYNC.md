@@ -109,6 +109,15 @@ convergence under adversarial offline-merge interleavings.
 **Phase 4 — hardening.** Tombstone GC / log compaction; encrypt the op payloads
 (optional E2E); benchmark.
 
+> **Chosen flagship direction: peer-to-peer sync over WebRTC.** After Phase 1
+> (local-first `/contacts`), the standout next step is to let two devices sync
+> their replicas **directly over a WebRTC data channel** — exchanging CRDT deltas
+> with no backend round-trip. The server is demoted to a *signaling relay* that
+> only helps peers find each other; once connected, contacts sync device-to-device
+> and keep working on a LAN with no internet. This is the "no cloud needed" demo
+> and the strongest distributed-systems story on top of the existing CRDT engine.
+> δ-state sync and end-to-end encryption follow naturally from there.
+
 **Decision — library vs from scratch?** For a *systems* showcase, implement the
 core CRDT (LWW-map + add-wins set + version vectors) **yourself** for Phases 1–3,
 and keep Automerge as the Phase-0 baseline you benchmark against. Hand-rolling
