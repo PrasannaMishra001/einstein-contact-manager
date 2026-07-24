@@ -20,6 +20,18 @@ export function isLoggedIn(): boolean {
   return !!getAccessToken();
 }
 
+/** Decode the user id (`sub`) from the access-token JWT payload. */
+export function getUserId(): string | null {
+  const t = getAccessToken();
+  if (!t) return null;
+  try {
+    const payload = JSON.parse(atob(t.split(".")[1] ?? "")) as { sub?: string };
+    return payload.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function login(email: string, password: string): Promise<User> {
   const { data } = await authAPI.login(email, password);
   saveTokens(data.access_token, data.refresh_token);
