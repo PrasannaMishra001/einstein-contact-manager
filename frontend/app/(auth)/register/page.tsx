@@ -20,6 +20,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  // The free Render backend cold-starts (~45 s) after idle — surface it.
+  const [slow, setSlow] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -27,6 +29,8 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
+    setSlow(false);
+    const slowTimer = setTimeout(() => setSlow(true), 4000);
     try {
       await registerUser(data.email, data.password, data.full_name);
       toast.success("Account created! Welcome to Einstein.");
@@ -35,6 +39,8 @@ export default function RegisterPage() {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Registration failed";
       toast.error(msg);
     } finally {
+      clearTimeout(slowTimer);
+      setSlow(false);
       setLoading(false);
     }
   };
@@ -92,6 +98,13 @@ export default function RegisterPage() {
               {loading ? "Creating account..." : <><span>Create Account</span><ArrowRight className="w-4 h-4 ml-2" /></>}
             </button>
           </form>
+
+          {slow && (
+            <p className="mt-3 text-xs font-bold text-center text-black/70 dark:text-white/60 leading-relaxed">
+              Waking the server… the free backend sleeps when idle, so the first
+              request can take up to ~45 seconds. Hang tight.
+            </p>
+          )}
 
           <div className="mt-6 pt-5 border-t-2 border-black dark:border-white/20">
             <p className="text-sm font-bold text-center text-black dark:text-white">
