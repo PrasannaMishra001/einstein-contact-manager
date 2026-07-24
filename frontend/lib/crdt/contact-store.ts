@@ -18,18 +18,26 @@
  */
 
 import { HLC, HLCTimestamp, compareHLC } from "./hlc";
-import { FieldMap, LWWRegister, mergeFieldMap, mergeRegister, readFields } from "./lww";
+import { FieldMap, LWWRegister, Scalar, mergeFieldMap, mergeRegister, readFields } from "./lww";
 import {
   ORSet, addElement, emptyORSet, mergeORSet, mintToken, readORSet, removeElement,
 } from "./or-set";
 
-export const CONTACT_FIELDS = ["name", "phone", "email", "company", "jobTitle", "notes"] as const;
+/** Text-ish fields (strings; JSON blobs are stored as strings too). */
+export const TEXT_FIELDS = [
+  "name", "phone", "email", "company", "jobTitle", "notes",
+  "birthday", "anniversary", "photoUrl", "address", "socialLinks",
+  "shareToken", "createdAt", "updatedAt",
+] as const;
+/** Boolean fields. */
+export const BOOL_FIELDS = ["isFavorite", "isArchived"] as const;
+export const CONTACT_FIELDS = [...TEXT_FIELDS, ...BOOL_FIELDS] as const;
 export type ContactField = (typeof CONTACT_FIELDS)[number];
 
 export interface ContactDoc {
   id: string;
   fields: FieldMap;
-  tags: ORSet;
+  tags: ORSet;                 // holds tag IDs
   deleted: LWWRegister<boolean>;
 }
 
@@ -45,7 +53,17 @@ export interface MaterializedContact {
   company: string;
   jobTitle: string;
   notes: string;
-  tags: string[];
+  birthday: string;
+  anniversary: string;
+  photoUrl: string;
+  shareToken: string;
+  createdAt: string;
+  updatedAt: string;
+  address: Record<string, unknown> | null;
+  socialLinks: Record<string, unknown> | null;
+  isFavorite: boolean;
+  isArchived: boolean;
+  tags: string[];              // tag IDs
 }
 
 const ZERO_TS = (node: string): HLCTimestamp => ({ millis: 0, counter: 0, node });
@@ -70,20 +88,36 @@ export function mergeState(a: ReplicaState, b: ReplicaState): ReplicaState {
   return { docs };
 }
 
+function parseJson(v: Scalar): Record<string, unknown> | null {
+  if (typeof v !== "string" || !v) return null;
+  try { return JSON.parse(v) as Record<string, unknown>; } catch { return null; }
+}
+
 /** Conflict-resolved view of a state (the join's "read"). Deterministic order. */
 export function materialize(state: ReplicaState): MaterializedContact[] {
   const out: MaterializedContact[] = [];
   for (const doc of Object.values(state.docs)) {
     if (doc.deleted.value) continue;
     const f = readFields(doc.fields);
+    const str = (k: string) => String(f[k] ?? "");
     out.push({
       id: doc.id,
-      name: String(f.name ?? ""),
-      phone: String(f.phone ?? ""),
-      email: String(f.email ?? ""),
-      company: String(f.company ?? ""),
-      jobTitle: String(f.jobTitle ?? ""),
-      notes: String(f.notes ?? ""),
+      name: str("name"),
+      phone: str("phone"),
+      email: str("email"),
+      company: str("company"),
+      jobTitle: str("jobTitle"),
+      notes: str("notes"),
+      birthday: str("birthday"),
+      anniversary: str("anniversary"),
+      photoUrl: str("photoUrl"),
+      shareToken: str("shareToken"),
+      createdAt: str("createdAt"),
+      updatedAt: str("updatedAt"),
+      address: parseJson(f.address),
+      socialLinks: parseJson(f.socialLinks),
+      isFavorite: f.isFavorite === true,
+      isArchived: f.isArchived === true,
       tags: readORSet(doc.tags),
     });
   }
@@ -112,14 +146,21 @@ export class Replica {
     return doc;
   }
 
-  create(id: string, initial: Partial<Record<ContactField, string>> = {}): void {
+  create(id: string, initial: Partial<Record<ContactField, Scalar>> = {}): void {
     this.ensure(id);
-    for (const [k, v] of Object.entries(initial)) this.setField(id, k as ContactField, v ?? "");
+    this.setMany(id, initial);
   }
 
-  setField(id: string, field: ContactField, value: string): void {
+  setField(id: string, field: ContactField, value: Scalar): void {
     const doc = this.ensure(id);
     doc.fields = { ...doc.fields, [field]: { value, ts: this.clock.now() } };
+  }
+
+  /** Set several fields at once (each gets its own HLC stamp). */
+  setMany(id: string, values: Partial<Record<ContactField, Scalar>>): void {
+    for (const [k, v] of Object.entries(values)) {
+      this.setField(id, k as ContactField, (v ?? null) as Scalar);
+    }
   }
 
   addTag(id: string, tag: string): void {
@@ -165,6 +206,17 @@ export class Replica {
   /** Replace local state (e.g. hydrate from IndexedDB) — Phase 1 will use this. */
   load(state: ReplicaState): void {
     this.state = JSON.parse(JSON.stringify(state)) as ReplicaState;
+  }
+
+  /**
+   * Move a doc to a new id and tombstone the old one — used when a contact
+   * created offline (temp id) is first POSTed and gets its real server id.
+   */
+  renameDoc(oldId: string, newId: string): void {
+    const doc = this.state.docs[oldId];
+    if (!doc || oldId === newId) return;
+    this.state.docs[newId] = { ...(JSON.parse(JSON.stringify(doc)) as ContactDoc), id: newId };
+    this.remove(oldId);
   }
 
   contacts(): MaterializedContact[] {
