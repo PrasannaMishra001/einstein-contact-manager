@@ -1,0 +1,38 @@
+name: Keep backend warm
+
+# The backend runs on Render's free tier, which sleeps the service after ~15 min
+# of inactivity. The next request then cold-starts it (~45 s), which makes login
+# feel broken. This pings /health periodically to keep it awake.
+#
+# Caveats:
+#   - GitHub's scheduled cron is best-effort and can lag several minutes under
+#     load, and it stops running after ~60 days of no repo activity. For a hard
+#     guarantee use an external monitor (UptimeRobot, cron-job.org) instead.
+#   - Keeping one free Render service always awake uses ~720 of the 750 free
+#     instance-hours per month — fine for a single service, tight if you run more.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes
+  workflow_dispatch: {}       # allow manual runs from the Actions tab
+
+# Don't stack runs if one is slow (a cold start can take ~50 s).
+concurrency:
+  group: keep-warm
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          URL="https://einstein-backend-vaqs.onrender.com/health"
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 --retry 2 "$URL")
+          echo "GET $URL -> HTTP $code"
+          # A cold start still counts as success; only fail on a real error.
+          if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
+            exit 0
+          fi
+          echo "::warning::Backend health check returned $code"
+          exit 1
