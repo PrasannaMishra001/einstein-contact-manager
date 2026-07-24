@@ -32,9 +32,12 @@ interface Props {
   tags: Tag[];
   onClose: () => void;
   onSuccess: () => void;
+  /** Local-first save path. When provided, data goes through the CRDT store
+   *  (offline-capable) instead of a direct API call. Returns the resolved id. */
+  onSave?: (payload: Record<string, unknown>, id?: string) => Promise<{ id: string; synced: boolean }>;
 }
 
-export function ContactForm({ contact, tags, onClose, onSuccess }: Props) {
+export function ContactForm({ contact, tags, onClose, onSuccess, onSave }: Props) {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(contact?.photo_url || null);
   const [saving, setSaving] = useState(false);
@@ -74,6 +77,21 @@ export function ContactForm({ contact, tags, onClose, onSuccess }: Props) {
         anniversary: data.anniversary || undefined,
         social_links: hasSocial ? social_links : undefined,
       };
+      if (onSave) {
+        // Local-first path: instant, offline-capable.
+        const { id, synced } = await onSave(payload, contact?.id);
+        if (photoFile) {
+          if (synced) {
+            try { await contactsAPI.uploadPhoto(id, photoFile); } catch { /* non-fatal */ }
+          } else {
+            toast("Saved offline — add the photo again once you're back online.", { icon: "📵" });
+          }
+        }
+        toast.success(contact ? "Contact updated!" : "Contact added!");
+        onSuccess();
+        return;
+      }
+
       let saved: Contact;
       if (contact) {
         const { data: updated } = await contactsAPI.update(contact.id, payload);
